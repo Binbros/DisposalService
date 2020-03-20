@@ -6,9 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const cors_1 = __importDefault(require("cors"));
 const body_parser_1 = __importDefault(require("body-parser"));
 const compression_1 = __importDefault(require("compression"));
-exports.handleCors = (router) => {
-    router.use(cors_1.default({ credentials: true, origin: true }));
-};
+exports.handleCors = (router) => router.use(cors_1.default({ credentials: true, origin: true }));
 exports.handleBodyRequestParsing = (router) => {
     router.use(body_parser_1.default.urlencoded({ extended: true }));
     router.use(body_parser_1.default.json());
