@@ -1,9 +1,8 @@
 /* eslint-disable no-shadow */
 import path from 'path';
 import * as winston from 'winston';
+import redisTransport from 'winston-redis';
 import {Loggly} from 'winston-loggly-bulk';
-import dotenv from 'dotenv';
-dotenv.config()
 
 const { format } = winston;
 const {
@@ -41,6 +40,7 @@ const logger = winston.createLogger({
     }),
     // all log with level of warn should be outputed on the console
     new winston.transports.Console({ level: 'warn' }),
+    new redisTransport({level: 'info'})
   ],
   // all exceptions should be logged in the exceptions.log
   exceptionHandlers: [
@@ -55,8 +55,14 @@ logger.add(new Loggly({
     token: `${process.env.LOGTOKEN}`,
     subdomain: 'binbro',
     tags: ['Winston-NodeJS'],
-    json: true
-}));
+    json: true,
+    auth:{
+        username: 'Binbro',
+        password: `${process.env.LOGPASSWORD}`
+    }
+}),)
+;
+
 
 
 export default logger
