@@ -1,8 +1,9 @@
 /* eslint-disable no-shadow */
 import path from 'path';
 import * as winston from 'winston';
+import redisTransport from 'winston-redis';
 import {Loggly} from 'winston-loggly-bulk';
-import dotenv from 'dotenv';
+import dotenv from 'dotenv'
 dotenv.config()
 
 const { format } = winston;
@@ -13,7 +14,6 @@ const {
 const myFormat = printf(
   ({ level, message, timestamp}) => `${timestamp} ${level}: ${message}`,
 );
-
 const logger = winston.createLogger({
   // combine both json and timestamp for log output
   format: combine(
@@ -41,6 +41,13 @@ const logger = winston.createLogger({
     }),
     // all log with level of warn should be outputed on the console
     new winston.transports.Console({ level: 'warn' }),
+    new redisTransport({level: 'info'}),
+    new Loggly({
+      token: `${process.env.LOGTOKEN}`,
+      subdomain: 'binbro',
+      tags: ['Winston-NodeJs'],
+      json: true
+  })
   ],
   // all exceptions should be logged in the exceptions.log
   exceptionHandlers: [
@@ -51,12 +58,7 @@ const logger = winston.createLogger({
   // loggers should not exit if there are exceptions, only log it
   exitOnError: false,
 });
-logger.add(new Loggly({
-    token: `${process.env.LOGTOKEN}`,
-    subdomain: 'binbro',
-    tags: ['Winston-NodeJS'],
-    json: true
-}));
 
+;
 
 export default logger
