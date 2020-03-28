@@ -14,12 +14,12 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const logger_1 = __importDefault(require("./utils/logger"));
 const errorHandler_1 = __importDefault(require("./middleware/errorHandler"));
 dotenv_1.default.config();
-process.on('uncaughtException', e => {
-    console.log(e);
+process.on('uncaughtException', (e) => {
+    logger_1.default.error('uncaught exception', e);
     process.exit(1);
 });
-process.on('unhandledRejection', e => {
-    console.log(e);
+process.on('unhandledRejection', (e) => {
+    logger_1.default.error('Unhandled Promise rejection', e);
     process.exit(1);
 });
 const router = express_1.default();
@@ -28,6 +28,9 @@ router.use(morgan_1.default('combined', { stream: {
             logger_1.default.info(message);
         },
     } }));
+// const graphqlServer = new ApolloServer({
+// })
+// graphqlServer.applyMiddleware({app: router, path:'/graphql'})
 utils_1.applyMiddleware(middleware_1.default, router);
 utils_1.applyRoutes(route_1.default, router);
 utils_1.applyMiddleware(errorHandler_1.default, router);
