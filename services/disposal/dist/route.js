@@ -14,7 +14,7 @@ exports.default = [
         path: '/',
         method: 'get',
         handler: (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-            res.status(200).json('Ready to dispose your waste? You\'re at the right place!');
+            res.send('Ready to dispose your waste? You\'re at the right place!');
         })
     }
 ];

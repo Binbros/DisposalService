@@ -7,7 +7,7 @@ const http_1 = __importDefault(require("http"));
 const express_1 = __importDefault(require("express"));
 const utils_1 = require("./utils");
 const middleware_1 = __importDefault(require("./middleware"));
-const route_1 = __importDefault(require("./src/route"));
+const route_1 = __importDefault(require("./route"));
 const morgan_1 = __importDefault(require("morgan"));
 const redis_1 = __importDefault(require("redis"));
 const dotenv_1 = __importDefault(require("dotenv"));
@@ -34,7 +34,7 @@ router.use(morgan_1.default('combined', { stream: {
 utils_1.applyMiddleware(middleware_1.default, router);
 utils_1.applyRoutes(route_1.default, router);
 utils_1.applyMiddleware(errorHandler_1.default, router);
-const redisClient = redis_1.default.createClient(`${process.env.REDISURL}`);
+const redisClient = redis_1.default.createClient({ host: process.env.REDIS_PORT, port: Number(process.env.REDIS_PORT), retry_strategy: () => 1000 });
 // process.env.REDIS_URL is the redis url config variable name on heroku. 
 // if local use redis.createClient()
 redisClient.on('connect', () => {

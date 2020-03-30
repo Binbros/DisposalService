@@ -1,14 +1,10 @@
 # Use the official image as a parent image
-FROM node:current-slim
-# FROM redis
-
+FROM node:alpine
 # Set the working directory
-WORKDIR /usr/src/app
+WORKDIR /disposal
 
 # Copy the file from your host to your current location
-COPY package.json .
-
-COPY redis.conf redis.conf
+COPY . .
 
 # Run the command inside your image filesystem
 RUN npm install
@@ -16,7 +12,6 @@ RUN npm install
 # Inform Docker that the container is listening on the specified port at runtime.
 EXPOSE 8080
 
-COPY . .
 # Run the specified command within the container.
 CMD [ "npm", "start" ]
 

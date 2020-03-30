@@ -13,7 +13,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 /* eslint-disable no-shadow */
 const path_1 = __importDefault(require("path"));
 const winston = __importStar(require("winston"));
-const winston_redis_1 = __importDefault(require("winston-redis"));
 const winston_loggly_bulk_1 = require("winston-loggly-bulk");
 const dotenv_1 = __importDefault(require("dotenv"));
 dotenv_1.default.config();
@@ -43,7 +42,6 @@ const logger = winston.createLogger({
         }),
         // all log with level of warn should be outputed on the console
         new winston.transports.Console({ level: 'warn' }),
-        new winston_redis_1.default({ level: 'info' }),
         new winston_loggly_bulk_1.Loggly({
             token: `${process.env.LOGTOKEN}`,
             subdomain: 'binbro',

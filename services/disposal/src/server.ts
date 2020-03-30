@@ -4,7 +4,7 @@ import { applyMiddleware, applyRoutes } from './utils';
 import {ApolloServer} from 'apollo-server-express';
 import parser from 'body-parser';
 import middleware from './middleware';
-import routes from './src/route';
+import routes from './route';
 import morgan from 'morgan';
 import redis from 'redis';
 import dotenv from 'dotenv';
@@ -33,7 +33,8 @@ applyMiddleware(middleware, router)
 applyRoutes(routes, router)
 applyMiddleware(errorHandlers, router)
 
-const redisClient = redis.createClient(`${process.env.REDISURL}`);
+
+const redisClient = redis.createClient({host:process.env.REDIS_PORT, port:Number(process.env.REDIS_PORT), retry_strategy:()=>1000});
 // process.env.REDIS_URL is the redis url config variable name on heroku. 
 // if local use redis.createClient()
 redisClient.on('connect',()=>{
