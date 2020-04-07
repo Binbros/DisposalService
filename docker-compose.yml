@@ -1,9 +1,10 @@
 version: "3"
 services:
+  rabbitmq-server:
+    build: "./rabbitmq-server"
   redis:
     build:
       context: "./services/redis-image"
-
   disposal:
     build:
       context: "./services/disposal"
@@ -15,5 +16,6 @@ services:
     volumes:
       - /disposal/node_modules
       - ./services/disposal:/disposal
+      - /rabbitmq-server:/data
     ports:
       - "3000:3000"
