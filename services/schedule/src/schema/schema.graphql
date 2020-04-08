@@ -1,0 +1,23 @@
+type Query {
+    viewSchedule: [Schedule]!
+}
+type Mutation {
+    AddSchedule (date:Date , time:Time , recurrent:Boolean ,): Schedule
+    updateSchedule: Schedule
+    deleteSchedule: Schedule
+}
+type Schedule {
+    id: ID!
+    date: Date
+    time: Time
+    recurrent: Boolean
+    day: String
+    createdAt: 
+    postedBy: User
+}
+scalar Date {
+
+}
+scalar Time {
+
+}

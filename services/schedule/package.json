@@ -1,0 +1,51 @@
+{
+  "name": "DisposalService",
+  "version": "1.0.0",
+  "description": "Disposal service, a part of the micro-service architecture built in TypeScript",
+  "main": "index.js",
+  "scripts": {
+    "start:build": "tsc -w",
+    "start:run": "nodemon dist/server.js",
+    "start": "concurrently npm:start:*"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Binbros/DisposalService.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Binbros/DisposalService/issues"
+  },
+  "homepage": "https://github.com/Binbros/DisposalService#readme",
+  "dependencies": {
+    "@types/compression": "^1.7.0",
+    "@types/cors": "^2.8.6",
+    "@types/express": "^4.17.3",
+    "@types/graphql-depth-limit": "^1.1.2",
+    "@types/morgan": "^1.9.0",
+    "@types/node": "^13.9.4",
+    "@types/redis": "^2.8.16",
+    "@types/winston-loggly-bulk": "^3.0.0",
+    "apollo-server-express": "^2.11.0",
+    "body-parser": "^1.19.0",
+    "compression": "^1.7.4",
+    "concurrently": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "graphql": "^14.6.0",
+    "graphql-depth-limit": "^1.1.0",
+    "morgan": "^1.10.0",
+    "nodemon": "^2.0.2",
+    "pm2": "^4.2.3",
+    "redis": "^2.8.0",
+    "tsc-watch": "^4.2.3",
+    "tslint": "^6.1.0",
+    "typescript": "^3.8.3",
+    "winston": "^3.2.1",
+    "winston-loggly-bulk": "^3.0.1",
+    "winston-redis": "^3.1.0"
+  }
+}
