@@ -1,0 +1,21 @@
+version: "3"
+services:
+  rabbitmq-server:
+    build: "./rabbitmq-server"
+  redis:
+    build:
+      context: "./services/redis-image"
+  disposal:
+    build:
+      context: "./services/disposal"
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - LOGTOKEN=e9adc299-0cd0-477c-9fd3-51d74e91c36a
+      - NODE_ENV=production
+    volumes:
+      - /disposal/node_modules
+      - ./services/disposal:/disposal
+      - /rabbitmq-server:/data
+    ports:
+      - "3000:3000"
