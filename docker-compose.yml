@@ -1,21 +1,38 @@
 version: "3"
 services:
-  rabbitmq-server:
-    build: "./rabbitmq-server"
+  # rabbitmq-server:
+  #   build: "./rabbitmq-server"
   redis:
     build:
       context: "./services/redis-image"
-  disposal:
-    build:
-      context: "./services/disposal"
-    environment:
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - LOGTOKEN=e9adc299-0cd0-477c-9fd3-51d74e91c36a
+  # disposal:
+  #   build:
+  #     context: "./services/disposal"
+  #   environment:
+  #     - REDIS_HOST=redis
+  #     - REDIS_PORT=6379
+  #     - LOGTOKEN=e9adc299-0cd0-477c-9fd3-51d74e91c36a
+  #     - NODE_ENV=production
+  #   volumes:
+  #     - /disposal/node_modules
+  #     - ./services/disposal:/disposal
+  #     - /rabbitmq-server:/data
+  #   ports:
+  #     - "3000:3000"
+
+  mongo:
+    image: mongo
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
+
+  user:
+    build: 
+      context: "./services/user"
+    environment: 
       - NODE_ENV=production
-    volumes:
-      - /disposal/node_modules
-      - ./services/disposal:/disposal
-      - /rabbitmq-server:/data
-    ports:
-      - "3000:3000"
+      - MONGO_URI
+    volumes: 
+      - ./services/user:/user
+      # - /rabbitmq-server:/data
+    ports: 
+      - "8000:8000"
