@@ -1,1 +1,0 @@
-{"version":3,"file":"http404Error.js","sourceRoot":"","sources":["../../../src/utils/errors/http404Error.ts"],"names":[],"mappings":";;AAAA,uDAAiD;AACjD,MAAa,YAAa,SAAQ,iCAAe;IAG7C,YAAY,UAA2B,WAAW;QAChD,KAAK,CAAC,OAAO,CAAC,CAAC;QAHR,eAAU,GAAG,GAAG,CAAC;IAI1B,CAAC;CACF;AANH,oCAMG"}
