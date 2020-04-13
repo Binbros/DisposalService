@@ -1,1 +1,11 @@
 2020-03-28T11:57:13.419Z error: uncaught exceptionRedis connection to localhost:6379 failed - connect ECONNREFUSED 127.0.0.1:6379
+2020-04-13T12:40:47.636Z error: failed to connect to server [localhost:27017] on first connect [Error: connect ECONNREFUSED 127.0.0.1:27017
+    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1126:14) {
+  name: 'MongoNetworkError',
+  [Symbol(mongoErrorContextSymbol)]: {}
+}]
+2020-04-13T12:42:54.466Z error: failed to connect to server [localhost:27017] on first connect [Error: connect ECONNREFUSED 127.0.0.1:27017
+    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1126:14) {
+  name: 'MongoNetworkError',
+  [Symbol(mongoErrorContextSymbol)]: {}
+}]

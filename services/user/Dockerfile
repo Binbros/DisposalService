@@ -27,4 +27,4 @@ USER node
 
 ENTRYPOINT ["/sbin/tini", "--"]
 
-CMD ["node", "build/server.js"]
+CMD ["node", "start"]

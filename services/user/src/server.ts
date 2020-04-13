@@ -6,6 +6,7 @@ import context from "./context";
 import errorHandlers from "./middleware/errorHandler";
 import resolvers from "./resolver";
 import typeDefs from "./typedefs";
+import redis from 'redis';
 import { applyMiddleware, applyRoutes } from "./utils";
 import logger from "./utils/logger";
 
@@ -22,6 +23,8 @@ process.on("unhandledRejection", (e) => {
 db();
 
 const server = new GraphQLServer({ typeDefs, resolvers, context });
+
+
 
 const options = {
   port: 8000,
