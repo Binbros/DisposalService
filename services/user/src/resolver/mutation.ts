@@ -1,12 +1,13 @@
 import bcrypt from "bcryptjs";
+import yup from '../validations/user.schema';
 import dotenv from "dotenv";
 import { Context } from "graphql-yoga/dist/types";
 import jwt, { Secret } from "jsonwebtoken";
-import { model } from "mongoose";
 import { generateAccessToken, generateRefreshCookie, refreshToken, verifyToken } from "../utils/auth";
-import emailer from "../utils/emailer";
+// import emailer from "../utils/emailer";
 dotenv.config();
 const userSecret = process.env.USER_SECRET as Secret;
+
 
 export const signup = async (parent: any, args: any, { models, request, response }: Context) => {
     try {
@@ -97,3 +98,25 @@ export const unblockDevice = async (args: any, { models }: Context) => {
     models.blacklisted.update({user: decoded.id}, {blacklistedIps : blacklist} );
     return addDevice ({ipAddress: unblockedIp, id: decoded.id}, {models});
 };
+
+
+const resolver = {
+    Query: {
+        getUser: '',
+        getAllUsers: '',
+        refreshToken
+    },
+    Mutation: {
+        signup: {
+            validateSignup: yup.signup(),
+            resolve: signup
+        },
+        login: {
+            validateSignup: yup.login(),
+            resolve: login
+        },
+        addIpAddress:""
+    }
+}
+
+export default resolver
