@@ -4,6 +4,7 @@ import { badRequestError, notFoundError, serverError } from "../utils/errors/err
 
 export const signup = async (parent, args, {models, req, res}) => {
     try {
+        console.log(args)
         const password = await bcrypt.hash(args.password, 10);
         const user = await models.user.create(args);
         generateCookies({ id: user.id }, req);
@@ -14,7 +15,7 @@ export const signup = async (parent, args, {models, req, res}) => {
     }
 
 };
-export const login = async (parent, args, context) => {
+export const login = async ( parent, args, context) => {
     const user = await models.user.findBy({ email: args.email });
     if (!user) {
         notFoundError("User not found");
@@ -28,9 +29,9 @@ export const login = async (parent, args, context) => {
     // tell user to confirm if he or she is logging in with a different device
     // if user verifies the  device , the platform or ipaddress that doesnt exist get added to him
     //
-    if (){
+    // if (){
 
-    }
+    // }
     generateCookies({ id: user.id }, context.request);
     generateRefreshToken({ id: user.id, platform: user.platform, address: user.ipAddress }, context.request);
     return user;

@@ -8,7 +8,7 @@ export interface IUser extends Document {
     password: string;
     verified: boolean;
     verifiedIp: [string];
-    platform: [string];
+    platforms: [string];
 }
 
 const userSchema: Schema = new Schema({
@@ -17,9 +17,9 @@ const userSchema: Schema = new Schema({
     lastName: { type: String, required: true },
     password: { type: String, required: true },
     phoneNumber: { type: Number, required: true, unique: true },
-    platform: { type: Array, required: true},
+    platforms: { type: Array, required: true},
     verified: { type: Boolean, default: false },
-    verifiedIp: { type: Array, required: true },
+    verifiedIps: { type: Array, required: true },
 });
 
 export default mongoose.model<IUser>("user", userSchema);

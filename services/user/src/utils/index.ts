@@ -1,30 +1,31 @@
-import { Router, Request, Response, NextFunction } from 'express';
+import { NextFunction, Request, Response, Router } from "express";
+import { GraphQLServer } from "graphql-yoga";
 
-type Wrapper =  ((router: Router) => void)
+type Wrapper =  ((router: GraphQLServer) => void);
 type Handler = (
-    req:Request,
-    res:Response,
+    req: Request,
+    res: Response,
     next: NextFunction,
-) => Promise <void> | void
+) => Promise <void> | void;
 
-type Route = {
-    path: string,
-    method: string,
-    handler: Handler | Handler[]
+interface IRoute {
+    path: string;
+    method: string;
+    handler: Handler | Handler[];
 }
 
 export const applyMiddleware = (
     middleware: Wrapper[],
-    router: Router
+    router: GraphQLServer,
   ) => {
     for (const f of middleware) {
       f(router);
     }
   };
 
-export const  applyRoutes= (routes: Route[], router:Router) => {
-    for (const route of routes){
+export const  applyRoutes = (routes: IRoute[], router: Router) => {
+    for (const route of routes) {
         const {method , path , handler} = route;
-        (router as any)[method](path, handler)
+        (router as any)[method](path, handler);
     }
-}
+};

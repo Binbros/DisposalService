@@ -1,8 +1,8 @@
 import dotenv from "dotenv";
 import jwt from "jsonwebtoken"
-import { uuidv5 } from "uuid";
+import {v5 as uuidv5} from "uuid";
 import user from "../models/user";
-import redis from "./redis/service";
+import redis from "./redis";
 
 dotenv.config();
 export const AppSecret = process.env.APP_SECRET;
