@@ -13,12 +13,10 @@ function getValidationSchema(info:any) {
                 } catch (error) {
                     if(error instanceof yup.ValidationError) {
                         throw error.message
-                    }else {
-                        throw error
                     }
+                    throw error
                 }
             }
-
             return resolve(root, args, context, info);
         }
     }

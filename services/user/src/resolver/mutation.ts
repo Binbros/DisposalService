@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import yup from '../validations/user.schema';
 import dotenv from "dotenv";
 import { Context } from "graphql-yoga/dist/types";
 import jwt, { Secret } from "jsonwebtoken";
@@ -7,6 +6,10 @@ import { generateAccessToken, generateRefreshCookie, refreshToken, verifyToken }
 // import emailer from "../utils/emailer";
 dotenv.config();
 const userSecret = process.env.USER_SECRET as Secret;
+
+// import { generateCookies, generateRefreshToken, refreshToken, verifyToken } from "../utils/auth";
+
+import yup from '../validations/user.schema';
 
 
 export const signup = async (parent: any, args: any, { models, request, response }: Context) => {
