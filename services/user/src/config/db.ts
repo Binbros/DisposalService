@@ -7,5 +7,6 @@ dotenv.config();
 const url = process.env.MONGO_URI || "mongodb://localhost:27017/myapp";
 
 export default function db() {
-    mongoose.connect( url, {useNewUrlParser: true}).catch((err) => logger.error(err));
+    mongoose.connect( url, { useCreateIndex: true,    useNewUrlParser: true, useUnifiedTopology: true,
+      }).catch((err) => logger.error(err));
 }

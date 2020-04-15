@@ -4,19 +4,29 @@ type Query {
     getAllUsers:[User]!
   }
 type Mutation {
-  signup(email: String, firstname: String , lastname: String , password: String, PhoneNumber:Int, verified:Boolean=false): User!
-  login(email: String, password: String): User!
+  signup(data: signupDetails): {user :User! ,token:String}
+  login(data: loginDetails): {user :User! ,token:String}
+  addIpAddress(ipAddress: String , deviceName: String ): [String!]!
 }
 
 type User {
   id: ID!
   firstname: String!
   lastname: String!
-  password: String!
   PhoneNumber:Int!
-  verified: Boolean!
-  verifiedIps: [String!]!
-  platforms: [String!]!
+  verified: Boolean
 }
-`
+input signupDetails{
+  email: String
+  firstname: String
+  lastname: String
+  password: String
+  PhoneNumber:Int,
+}
+input loginDetails{
+  email: String
+  password: String
+}
+`;
+
 export default typeDefs;

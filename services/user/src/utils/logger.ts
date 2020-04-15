@@ -49,13 +49,13 @@ const logger = winston.createLogger({
     }),
     // all log with level of warn should be outputed on the console
     new winston.transports.Console({ level: "warn" }),
-    new Loggly({
-      json: true,
-      subdomain: "binbro",
-      tags: ["Winston-NodeJs"],
-      token: `${process.env.LOGTOKEN}`,
+  //   new Loggly({
+  //     json: true,
+  //     subdomain: "binbro",
+  //     tags: ["Winston-NodeJs"],
+  //     token: `${process.env.LOGTOKEN}`,
 
-  }),
+  // }),
   ],
   // all exceptions should be logged in the exceptions.log
 

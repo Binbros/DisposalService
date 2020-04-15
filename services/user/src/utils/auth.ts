@@ -1,74 +1,45 @@
 import dotenv from "dotenv";
-import jwt from "jsonwebtoken"
-import {v5 as uuidv5} from "uuid";
-import user from "../models/user";
-import redis from "./redis";
-
+import { Context } from "graphql-yoga/dist/types";
+import jwt, { Secret } from "jsonwebtoken";
+import { parse } from "querystring";
+import { v4 as uuidv4 } from "uuid";
+import redis from "../utils/redis";
 dotenv.config();
-export const AppSecret = process.env.APP_SECRET;
-export const RefreshSecret = process.env.REFRESH_SECRET;
 
-export const generateCookies = (args, context) => {
-    const token = jwt.sign({ userId: args.id, settings: args.userSettings }, AppSecret);
-    const auth = context.res.cookie("token", token, {
-        expires: "60s",
-        secure: false,
+const AppSecret = process.env.APP_SECRET as Secret;
+const RefreshSecret = process.env.REFRESH_SECRET as Secret;
+
+export const generateAccessToken = (args: any) => {
+    const token = jwt.sign({ id: args.id }, AppSecret, {
+        expiresIn: "15m",
+    });
+    return token;
+};
+export const generateRefreshCookie = (args: any, {response}: Context ) => {
+    // tslint:disable-next-line: no-shadowed-variable
+    const refreshToken = jwt.sign({ id: args.id, address: args.address }, RefreshSecret, { expiresIn: "30d" });
+    const auth = response.cookie("refreshtoken", refreshToken, {
+        expires: "30d",
         httpOnly: true,
+        secure: false,
     });
     return auth;
 };
-
-export const generateRefreshToken = (args, context) => {
-    const userRefreshTokens = redis.lrange(`${args.id}`, 0, 5);
-    redis.set(`${args.id}`, userRefreshTokens);
-    // tslint:disable-next-line: no-shadowed-variable
-    const refreshToken = jwt.sign({ userId: args.id }, RefreshSecret, { expiresIn: "30d" });
-    redis.lpush(`${args.id}`, JSON.stringify({
-        id: uuidv5(),
-        userId: args.id,
-        // tslint:disable-next-line: object-literal-sort-keys
-        refreshToken,
-        // only the ip to know when a different device is used
-        userSettings: args.userSettings,
-    }));
-    return refreshToken;
-};
-export const refreshToken = (args, context) => {
-    const userRefreshTokens = redis.lrange(`${args.id}`, 0, 5);
-    if (!userRefreshTokens || !userRefreshTokens.length) {
-        throw new Error("No Refresh Token found");
-    }
-    const currentRefreshToken = userRefreshTokens.find((userTokens) => userTokens.refreshToken === args.refreshToken);
+export const refreshToken = (args: any, {request, response}: Context) => {
+    const tokenString =  request.headers.cookies.split(";")[0];
+    const currentRefreshToken = tokenString.split("=")[1];
     if (!currentRefreshToken) {
-        throw new Error(`Refresh token is wrong`);
+        throw new Error ("No Refresh Token found");
     }
-    const payload = {
-        userId: args.id,
-        settings: args.userSettings,
-    };
-    generateCookies(payload, context);
-    const newRefreshToken = getUpdatedRefreshToken(currentRefreshToken, payload);
-    return newRefreshToken;
+    generateRefreshCookie(args, response);
+    return generateAccessToken(args);
 };
-export const getUpdatedRefreshToken = (oldRefreshToken, payload) => {
-    const newRefreshToken = jwt.sign(payload, RefreshSecret, { expiresIn: "30d" });
-    redis.lrange(`${arg.id}`, 0, 5).map((token) => {
-        if (token.refreshToken === oldRefreshToken) {
-            return {
-                ...token,
-                refreshToken: newRefreshToken,
-            };
-        }
-    });
 
-    return newRefreshToken;
-};
-export const verifyToken = (context) => {
-    const tokenString = context.headers.cookies.split(";")[0];
-    const token = tokenString.split("=")[1];
+export const verifyToken = ({request}: Context) => {
+    const token = request.headers.Authorization.split("")[1];
     if (token) {
-        const { userId } = jwt.verify(token, AppSecret);
-        return userId;
+        const decoded = jwt.verify(token, AppSecret);
+        return decoded;
     }
     throw new Error("Not Authenticated");
 };

@@ -5,7 +5,6 @@ import { GraphQLServer } from "graphql-yoga";
 import redis from "redis";
 import db from "./config/db";
 import context from "./context";
-import errorHandlers from "./middleware/errorHandler";
 import middleware from "./middleware/index";
 import resolvers from "./resolver";
 import typeDefs from "./typedefs";
@@ -24,13 +23,11 @@ process.on("unhandledRejection", (e) => {
 
 db();
 
-
 const server = new GraphQLServer({
   context,
   resolvers,
   typeDefs });
 applyMiddleware(middleware, server);
-applyMiddleware(errorHandlers, server);
 
 const options = {
   endpoint: "/users",
@@ -42,5 +39,5 @@ const options = {
 
 // tslint:disable-next-line: no-shadowed-variable
 server.start(options, ({port}) =>
-logger.info(`Server started, listening on port ${port} for incoming requests.`),
+logger.warn(`Server started, listening on port ${port} for incoming requests.`),
 )

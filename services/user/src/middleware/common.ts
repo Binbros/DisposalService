@@ -19,19 +19,9 @@ export const handleBodyRequestParsing = (router: GraphQLServer) => {
 export const handleCookieParsing = (router: GraphQLServer) => {
   router.use(cookieparser());
 };
-export const handleCsurf = (router: GraphQLServer) => {
-  router.use(csurf({ cookie: true }));
-};
+
 export const handleCompression = (router: GraphQLServer) => {
   router.use(compression());
-};
-
-export const handleCsurfPrevention = (router: GraphQLServer) => {
-  router.use("/", (req: Request, res: Response, next: NextFunction) => {
-    const token = req.csrfToken();
-    res.cookie("XSRF-TOKEN", token);
-    next();
-  });
 };
 
 export const handleLogStreaming = (router: GraphQLServer) => {

@@ -1,14 +1,10 @@
-import { Request, Response } from "express";
+import { ContextParameters } from "graphql-yoga/dist/types";
 import models from "../models";
 
-interface IContextParameters {
-    req: Request;
-    res: Response;
-}
-export default function({req, res}: IContextParameters) {
+export default function({request, response}: ContextParameters) {
     return {
         models,
-        req,
-        res,
+        request,
+        response,
     };
 }

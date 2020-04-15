@@ -1,6 +1,7 @@
 import {
-    handleBodyRequestParsing, handleCompression, handleCookieParsing, handleCors, handleCsurf, handleCsurfPrevention, handleLogStreaming
+    handleBodyRequestParsing, handleCompression, handleCookieParsing, handleCors,
+    handleLogStreaming,
 } from "./common";
 
-export default [handleCors, handleBodyRequestParsing, handleCompression, handleCookieParsing, handleLogStreaming,
-    handleCsurf, handleCsurfPrevention];
+export default [handleCors, handleBodyRequestParsing,  handleCookieParsing, handleCompression, handleLogStreaming,
+];
