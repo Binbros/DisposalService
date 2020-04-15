@@ -2,16 +2,17 @@ import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import { Context } from "graphql-yoga/dist/types";
 import jwt, { Secret } from "jsonwebtoken";
+import { model } from "mongoose";
 import { generateAccessToken, generateRefreshCookie, refreshToken, verifyToken } from "../utils/auth";
 import emailer from "../utils/emailer";
 dotenv.config();
 const userSecret = process.env.USER_SECRET as Secret;
 
-
 export const signup = async (parent: any, args: any, { models, request, response }: Context) => {
     try {
         const password = await bcrypt.hash(args.password, 10);
         const user = await models.user.create({ ...args, password });
+        await models.blacklisted.create({ user: user.id, blacklistedIps: [] });
         const token = generateAccessToken({ id: user.id });
         generateRefreshCookie({
             address: jwt.sign({ address: [user.ipAddress] }, userSecret),
@@ -34,7 +35,7 @@ export const login = async (parent: any, args: any, { models, request, response 
     const ipAddress = request.headers["X-Forwarded-For"].split("")[0];
     const decryptedIps = jwt.verify(args.ipAddress, userSecret) as any;
     if (!decryptedIps.address.includes(ipAddress)) {
-        return verifyDevice(ipAddress, models);
+        return verifyDevice({ ipAddress, id: user.id }, models);
     }
     const token = generateAccessToken({ id: user.id });
     generateRefreshCookie({ id: user.id, address: jwt.sign({ address: user.ipAddress }, userSecret) }, response);
@@ -45,42 +46,54 @@ export const refresh = (parent: any, args: any, { request, response }: Context) 
     return refreshToken(args, { request, response });
 };
 
-export const addDevice = async (parent: any, args: any, { models, request }: Context) => {
-    const ipAddress = request.headers["X-Forwarded-For"].split("")[0];
-    const decoded = verifyToken(request);
-    const addingDevice = await models.user.findOneandupdate({ id: decoded.id },
+export const addDevice = async (args: any, { models, request }: Context) => {
+    const ipAddress = args.ipAddress || request.headers["X-Forwarded-For"].split("")[0] ;
+    const decoded = verifyToken(request) || jwt.verify(args.token, userSecret) as any;
+    const addingDevice = await models.user.findOneandupdate({ id: decoded.id || args.id},
         // need to ask vincent about this
         { useSecondAuth: true, deviceNames: args.deviceName, verifiedIps: ipAddress });
     return addingDevice;
 };
-export const verifyDevice = async (args: any, {models}: Context) => {
-    const user = await models.blacklisted.find({ id: args.id });
-    if(user.blacklistedIps.include(args.ipAddress)){
-        return emailer(
-            {
-                button: "verify device",
-                email: user.email,
-                message: "A different device is trying to login to your account",
-                extras: `If you did not try to log in, block the device`,
-                // link for blocking a device
-                // link for verifying a device
-                links: [``, ``],
-            },
-        );
+export const verifyDevice = async (args: any, { models }: Context) => {
+    // const user = await models.blacklisted.find({ id: args.id });
+    // if(user.blacklistedIps.include(args.ipAddress)){
+    //     return emailer(
+    //         {
+    //             button: "Unblock device",
+    //             email: user.email,
+    //             message: "This device has been blocked from accesing your account",
+    //             extras: `If you did not try to access this account with this device kindly ignore`,
+    //             // link for blocking a device
+    //             // link for verifying a device
+    //             links: [``, ``],
+    //         },
+    //     );
 
-    }
-   
+    // }
+    // return emailer(
+    //     {
+    //         button: "Verify device",
+    //         email: user.email,
+    //         message: "A different device is trying to access your account",
+    //         extras: `If you did not try to access this account kindly block the device`,
+    //         // link for blocking a device
+    //         // link for verifying a device
+    //         links: [``, ``],
+    //     },
+    // );
 };
-export blackListDevice = async (args: any) => {
 
+export const blackListDevice = async (args: any, { models }: Context) => {
+    const decoded = jwt.verify(args.token, userSecret) as any;
+    const blacklistingDevice = await models.blacklisted.findOneandupdate({ user: decoded.id },
+        { blacklistedIps: args.ipAddress });
+    return blacklistingDevice;
 };
-// export const verifyAddress = async (parent, args, context, info) => {
-//     // check if the user has blacklisted that device
-//     // if device is blacklisted tell user that he or she blacklisted the device
-//     // send message to unblacklist the device to his email
-//     // if device is not blacklisted and user tries to login with a different device for the first time
-//     // send email that user should verify the device
-//     // on verification it should redirect to the login page
-//     // if the users does not verify then the ipaddress should be blacklisted for the user
-//     // if the platform and ip address is already verified it should return true
-// };
+
+export const unblockDevice = async (args: any, { models }: Context) => {
+    const decoded = jwt.verify(args.token, userSecret) as any;
+    const blacklist = await models.blacklisted.find({user: decoded.id});
+    const unblockedIp = blacklist.blacklistedIps.pop( blacklist.blacklistedIps.indexOf(args.ipAddress));
+    models.blacklisted.update({user: decoded.id}, {blacklistedIps : blacklist} );
+    return addDevice ({ipAddress: unblockedIp, id: decoded.id}, {models});
+};
