@@ -9,6 +9,8 @@ dotenv.config();
 const AppSecret = process.env.APP_SECRET as Secret;
 const RefreshSecret = process.env.REFRESH_SECRET as Secret;
 
+
+
 export const generateAccessToken = (args: any) => {
     const token = jwt.sign({ id: args.id }, AppSecret, {
         expiresIn: "15m",
@@ -38,8 +40,8 @@ export const refreshToken = (args: any, {request, response}: Context) => {
 export const verifyToken = ({request}: Context) => {
     const token = request.headers.Authorization.split("")[1];
     if (token) {
-        const decoded = jwt.verify(token, AppSecret);
-        return decoded;
+        const { id } = jwt.verify(token, AppSecret) as any;
+        return id;
     }
     throw new Error("Not Authenticated");
 };

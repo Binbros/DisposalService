@@ -2,65 +2,74 @@ import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import { Context } from "graphql-yoga/dist/types";
 import jwt, { Secret } from "jsonwebtoken";
-import { generateAccessToken, generateRefreshCookie, refreshToken, verifyToken} from "../utils/auth";
+import { generateAccessToken, generateRefreshCookie, refreshToken, verifyToken } from "../utils/auth";
 import emailer from "../utils/emailer";
 dotenv.config();
 const userSecret = process.env.USER_SECRET as Secret;
+
 
 export const signup = async (parent: any, args: any, { models, request, response }: Context) => {
     try {
         const password = await bcrypt.hash(args.password, 10);
         const user = await models.user.create({ ...args, password });
         const token = generateAccessToken({ id: user.id });
-        generateRefreshCookie({ id: user.id, address: jwt.sign({address: [user.ipAddress]},
-        userSecret)}, response);
-        return {...user, token};
+        generateRefreshCookie({
+            address: jwt.sign({ address: [user.ipAddress] }, userSecret),
+            id: user.id,
+        }, response);
+        return { ...user, token };
     } catch (err) {
-        throw new Error (err.toString());
+        throw new Error(err.toString());
     }
 };
 export const login = async (parent: any, args: any, { models, request, response }: Context) => {
     const user = await models.user.find({ email: args.email });
     if (!user) {
-        throw new Error ("User not found");
+        throw new Error("User not found");
     }
     const valid = bcrypt.compare(args.password, user.password);
     if (!valid) {
         throw new Error("Invalid Password");
     }
     const ipAddress = request.headers["X-Forwarded-For"].split("")[0];
-    const decryptedIps = jwt.verify(args.ipAddress, userSecret);
+    const decryptedIps = jwt.verify(args.ipAddress, userSecret) as any;
     if (!decryptedIps.address.includes(ipAddress)) {
-        return verifyDevice(ipAddress);
+        return verifyDevice(ipAddress, models);
     }
     const token = generateAccessToken({ id: user.id });
-    generateRefreshCookie({ id: user.id, address: jwt.sign({address: user.ipAddress}, userSecret)}, response);
-    return {...user , token };
+    generateRefreshCookie({ id: user.id, address: jwt.sign({ address: user.ipAddress }, userSecret) }, response);
+    return { ...user, token };
 };
-export const refresh =  () => {
-    
-}
 
-export const addDevice = async (parent: any, args: any , {models, request}: Context) => {
+export const refresh = (parent: any, args: any, { request, response }: Context) => {
+    return refreshToken(args, { request, response });
+};
+
+export const addDevice = async (parent: any, args: any, { models, request }: Context) => {
     const ipAddress = request.headers["X-Forwarded-For"].split("")[0];
     const decoded = verifyToken(request);
-    const addingDevice = await models.user.findOneandupdate({id: decoded.id } ,
-         {deviceNames: args.deviceName , verifiedIps: ipAddress} );
-
+    const addingDevice = await models.user.findOneandupdate({ id: decoded.id },
+        // need to ask vincent about this
+        { useSecondAuth: true, deviceNames: args.deviceName, verifiedIps: ipAddress });
+    return addingDevice;
 };
-export const verifyDevice = async ( args: any) => {
+export const verifyDevice = async (args: any, {models}: Context) => {
+    const user = await models.blacklisted.find({ id: args.id });
+    if(user.blacklistedIps.include(args.ipAddress)){
+        return emailer(
+            {
+                button: "verify device",
+                email: user.email,
+                message: "A different device is trying to login to your account",
+                extras: `If you did not try to log in, block the device`,
+                // link for blocking a device
+                // link for verifying a device
+                links: [``, ``],
+            },
+        );
 
-    return emailer(
-        {
-            button: "verify device",
-            email: user.email,
-            message: "A different device is trying to login to your account",
-            extras: `If you did not try to log in, block the device`,
-            // link for blocking a device
-            // link for verifying a device
-            links: [``, ``],
-        },
-    );
+    }
+   
 };
 export blackListDevice = async (args: any) => {
 

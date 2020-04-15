@@ -9,6 +9,7 @@ export interface IUser extends Document {
     verified: boolean;
     devicesNames: [string];
     verifiedIps: [string];
+    useSecondAuth: boolean;
 }
 
 const userSchema: Schema = new Schema({
@@ -20,6 +21,7 @@ const userSchema: Schema = new Schema({
     phoneNumber: { type: Number, required: true, unique: true },
     verified: { type: Boolean, default: false },
     verifiedIps: { type: Array, default: [""] },
+    useSecondAuth: {type: Boolean , default: false},
 });
 
 export default mongoose.model<IUser>("user", userSchema);
