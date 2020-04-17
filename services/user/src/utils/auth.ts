@@ -1,25 +1,23 @@
-import dotenv from "dotenv";
+
 import { Context } from "graphql-yoga/dist/types";
-import jwt, { Secret } from "jsonwebtoken";
-import { parse } from "querystring";
-import { v4 as uuidv4 } from "uuid";
-import redis from "../utils/redis";
-dotenv.config();
+import jwt, {Secret} from "jsonwebtoken";
+import helpers from "./index";
 
-const AppSecret = process.env.APP_SECRET as Secret;
-const RefreshSecret = process.env.REFRESH_SECRET as Secret;
+const {appSecret, refreshSecret} = helpers.secret;
 
-
-
+export const encode  =  (args: any, secret: Secret , options: object) => {
+    return jwt.sign(args, secret, options) as any;
+};
+export const decode = (args: any, secret: Secret) => {
+    return jwt.verify(args, secret) as any;
+};
 export const generateAccessToken = (args: any) => {
-    const token = jwt.sign({ id: args.id }, AppSecret, {
-        expiresIn: "15m",
-    });
+    const token = encode(args, appSecret, {expiresIn: "15m"});
     return token;
 };
 export const generateRefreshCookie = (args: any, {response}: Context ) => {
     // tslint:disable-next-line: no-shadowed-variable
-    const refreshToken = jwt.sign({ id: args.id, address: args.address }, RefreshSecret, { expiresIn: "30d" });
+    const refreshToken = encode(args, refreshSecret, { expiresIn: "30d" });
     const auth = response.cookie("refreshtoken", refreshToken, {
         expires: "30d",
         httpOnly: true,
@@ -40,7 +38,7 @@ export const refreshToken = (args: any, {request, response}: Context) => {
 export const verifyToken = ({request}: Context) => {
     const token = request.headers.Authorization.split("")[1];
     if (token) {
-        const { id } = jwt.verify(token, AppSecret) as any;
+        const { id } = decode(token, appSecret) as any;
         return id;
     }
     throw new Error("Not Authenticated");

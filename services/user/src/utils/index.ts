@@ -1,5 +1,8 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { GraphQLServer } from "graphql-yoga";
+import * as auth from "./auth";
+import logger from './logger';
+import secret from "./secret";
 
 type Wrapper =  ((router: GraphQLServer) => void);
 type Handler = (
@@ -7,12 +10,6 @@ type Handler = (
     res: Response,
     next: NextFunction,
 ) => Promise <void> | void;
-
-interface IRoute {
-    path: string;
-    method: string;
-    handler: Handler | Handler[];
-}
 
 export const applyMiddleware = (
     middleware: Wrapper[],
@@ -23,9 +20,8 @@ export const applyMiddleware = (
     }
   };
 
-export const  applyRoutes = (routes: IRoute[], router: Router) => {
-    for (const route of routes) {
-        const {method , path , handler} = route;
-        (router as any)[method](path, handler);
-    }
-};
+export default({
+    auth,
+    logger,
+    secret,
+  });

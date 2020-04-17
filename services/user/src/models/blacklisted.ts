@@ -1,13 +1,13 @@
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IBlacklist extends Document {
-    blacklistedIps:[string];
+    blacklistedIps: [string];
     user: string;
 }
 
 const blacklistSchema: Schema = new Schema({
     blacklistedIps: {type : Array},
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'user' }
+    user: { type: mongoose.Schema.Types.ObjectId, ref: "user" },
     // user: {type : String, required: true}
 });
 

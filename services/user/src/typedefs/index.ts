@@ -2,12 +2,15 @@ const typeDefs = `
   type Query {
       getUser(email: String): User!
       getAllUsers:[User]!
-      refreshToken(refreshToken: String!): String!
+      refresh(refreshToken: String!): String!
   }
   type Mutation {
     signup(data: signupDetails): Auth
     login(data: loginDetails): Auth
-    addIpAddress(ipAddress: String , deviceName: String ): [String!]!
+    addDevice(ipAddress: String , deviceName: String ): [String!]!
+    unblockDevice(token: String): Object!
+    blacklistDevice(token: String): Object!
+    verifyDevice
   }
 
   type User {

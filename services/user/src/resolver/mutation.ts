@@ -1,56 +1,73 @@
-import dotenv from "dotenv";
+
 import { Context } from "graphql-yoga/dist/types";
-import jwt, { Secret } from "jsonwebtoken";
-import { generateAccessToken, generateRefreshCookie, refreshToken, verifyToken } from "../utils/auth";
-// import emailer from "../utils/emailer";
-dotenv.config();
-const userSecret = process.env.USER_SECRET as Secret;
+import helpers from "../utils";
+import yup from "../validations/user.schema";
 
-// import { generateCookies, generateRefreshToken, refreshToken, verifyToken } from "../utils/auth";
-
-import yup from '../validations/user.schema';
-
+const { auth, secret, logger } = helpers;
 
 export const signup = async (parent: any, args: any, { models, request, response }: Context) => {
     try {
         const user = await models.user.create(args);
         await models.blacklisted.create({ user: user.id, blacklistedIps: [] });
-        const token = generateAccessToken({ id: user.id });
-        generateRefreshCookie({
-            address: jwt.sign({ address: [user.ipAddress] }, userSecret),
+        const token = auth.generateAccessToken({ id: user.id });
+        auth.generateRefreshCookie({
+            address: auth.encode({ address: [user.ipAddress] }, secret.userSecret, { expiresIn: "30d" }),
             id: user.id,
         }, response);
         return { ...user, token };
     } catch (err) {
+        logger.error(err.toString());
         throw new Error(err.toString());
     }
 };
 export const login = async (parent: any, args: any, { models, request, response }: Context) => {
-    const user = await models.user.find({ email: args.email });
-    if (!user || !user.comparePassword(args.password)) {
-        throw new Error("Invalid user login details");
+    try {
+        const user = await models.user.find({ email: args.email });
+        if (!user || !user.comparePassword(args.password)) {
+            throw new Error("Invalid user login details");
+        }
+        // get the ip address from the header
+        const ipAddress = request.headers["X-Forwarded-For"].split("")[0];
+        // if the user stored ipAddress does not include the ip from the headers
+        if (!user.ipAddress.includes(ipAddress)) {
+            return verifyDevice({ ipAddress, id: user.id }, models);
+        }
+        const token = auth.generateAccessToken({ id: user.id });
+        auth.generateRefreshCookie({
+            address: auth.encode({ address: [user.ipAddress] }, secret.userSecret, { expiresIn: "30d" }),
+            id: user.id,
+        },
+            response);
+        return { ...user, token };
+    } catch (err) {
+        logger.error(err.toString());
+        throw new Error(err.toString());
     }
-    const ipAddress = request.headers["X-Forwarded-For"].split("")[0];
-    const decryptedIps = jwt.verify(args.ipAddress, userSecret) as any;
-    if (!decryptedIps.address.includes(ipAddress)) {
-        return verifyDevice({ ipAddress, id: user.id }, models);
-    }
-    const token = generateAccessToken({ id: user.id });
-    generateRefreshCookie({ id: user.id, address: jwt.sign({ address: user.ipAddress }, userSecret) }, response);
-    return { ...user, token };
 };
 
 export const refresh = (parent: any, args: any, { request, response }: Context) => {
-    return refreshToken(args, { request, response });
+    return auth.refreshToken(args, { request, response });
 };
 
 export const addDevice = async (args: any, { models, request }: Context) => {
-    const ipAddress = args.ipAddress || request.headers["X-Forwarded-For"].split("")[0] ;
-    const decoded = verifyToken(request) || jwt.verify(args.token, userSecret) as any;
-    const addingDevice = await models.user.findOneandupdate({ id: decoded.id || args.id},
-        // need to ask vincent about this
-        { useSecondAuth: true, deviceNames: args.deviceName, verifiedIps: ipAddress });
-    return addingDevice;
+    try {
+        // get the ip address from either the argument or the  from the headers
+        // when token is sent from email, we have to decode the token to get the id of the user
+        const ipAddress = args.ipAddress || request.headers["X-Forwarded-For"].split("")[0];
+        const decoded = auth.verifyToken(request) || auth.decode(args.token, secret.emailTokenSecret);
+        // get the user details
+        const user = await models.user.find({ id: decoded.id || args.id });
+        const addingDevice = await models.user.update({ id: user.id },
+            {
+                deviceNames: [...user.deviceNames, args.deviceName],
+                useSecondAuth: true,
+                verifiedIps: [...user.verifiedIps, ipAddress],
+            });
+        return addingDevice;
+    } catch (err) {
+        logger.error(err.toString());
+        throw new Error(err.toString());
+    }
 };
 export const verifyDevice = async (args: any, { models }: Context) => {
     // const user = await models.blacklisted.find({ id: args.id });
@@ -82,38 +99,52 @@ export const verifyDevice = async (args: any, { models }: Context) => {
 };
 
 export const blackListDevice = async (args: any, { models }: Context) => {
-    const decoded = jwt.verify(args.token, userSecret) as any;
-    const blacklistingDevice = await models.blacklisted.findOneandupdate({ user: decoded.id },
-        { blacklistedIps: args.ipAddress });
-    return blacklistingDevice;
+    try {
+        const decoded = auth.decode(args.token, secret.emailTokenSecret);
+        const user = await models.blacklisted.findOne({ user: decoded.id });
+        const blacklistingDevice = await models.blacklisted.update({ user: user.id },
+            { blacklistedIps: [...user.blacklistedIps, decoded.ipAddress] });
+        return blacklistingDevice;
+    } catch (err) {
+        logger.error(err.toString());
+        throw new Error(err.toString());
+    }
 };
 
 export const unblockDevice = async (args: any, { models }: Context) => {
-    const decoded = jwt.verify(args.token, userSecret) as any;
-    const blacklist = await models.blacklisted.find({user: decoded.id});
-    const unblockedIp = blacklist.blacklistedIps.pop( blacklist.blacklistedIps.indexOf(args.ipAddress));
-    models.blacklisted.update({user: decoded.id}, {blacklistedIps : blacklist} );
-    return addDevice ({ipAddress: unblockedIp, id: decoded.id}, {models});
+    try {
+        const decoded = auth.decode(args.token, secret.emailTokenSecret);
+        const blacklist = await models.blacklisted.find({ user: decoded.id });
+        const unblockedIp = blacklist.blacklistedIps.pop(blacklist.blacklistedIps.indexOf(decoded.ipAddress));
+        models.blacklisted.update({ user: decoded.id }, { blacklistedIps: blacklist });
+        return addDevice({ ipAddress: unblockedIp, id: decoded.id }, { models });
+    } catch (err) {
+        logger.error(err.toString());
+        throw new Error(err.toString());
+    }
 };
 
-
 const resolver = {
-    Query: {
-        getUser: '',
-        getAllUsers: '',
-        refreshToken
-    },
     Mutation: {
-        signup: {
-            validateSignup: yup.signup(),
-            resolve: signup
-        },
+        addDevice,
+        blackListDevice,
         login: {
+            resolve: login,
             validateSignup: yup.login(),
-            resolve: login
         },
-        addIpAddress:""
-    }
-}
+        signup: {
+            resolve: signup,
+            validateSignup: yup.signup(),
+        },
+        unblockDevice,
+        verifyDevice,
 
-export default resolver
+    },
+    Query: {
+        getAllUsers: "",
+        getUser: "",
+        refresh,
+    },
+};
+
+export default resolver;

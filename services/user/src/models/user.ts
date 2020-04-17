@@ -1,5 +1,5 @@
-import mongoose, { Document, Schema } from "mongoose";
 import bcrypt from 'bcryptjs';
+import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
     email: string;
@@ -22,18 +22,18 @@ const userSchema: Schema = new Schema({
     phoneNumber: { type: Number, required: true, unique: true },
     verified: { type: Boolean, default: false },
     verifiedIps: { type: Array, default: [""] },
+    // tslint:disable-next-line: object-literal-sort-keys
     useSecondAuth: {type: Boolean , default: false},
 });
 
-userSchema.pre<IUser>('save', function (next) {
-    if (!this.isModified('password')) return next();
+userSchema.pre<IUser>("save", function(next) {
+    if (!this.isModified("password")) { return next(); }
     const hash = bcrypt.hashSync(this.password, 10);
     this.password = hash;
     return next();
   });
-userSchema.methods.comparePassword = function (password:string) {
+userSchema.methods.comparePassword = function(password: string) {
     const user = bcrypt.compareSync(password, this.password);
     return user ? this : null;
 };
 export default mongoose.model<IUser>("user", userSchema);
-
