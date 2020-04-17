@@ -1,7 +1,7 @@
-import * as Mutation from './mutation'
+import userResolver from './mutation'
 
 const resolvers = {
-  Mutation,
+  userResolver,
 }
 
 export default resolvers;

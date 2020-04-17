@@ -8,6 +8,7 @@ import context from "./context";
 import middleware from "./middleware/index";
 import resolvers from "./resolver";
 import typeDefs from "./typedefs";
+import validation from "./validations";
 import { applyMiddleware, applyRoutes } from "./utils";
 import logger from "./utils/logger";
 
@@ -26,7 +27,11 @@ db();
 const server = new GraphQLServer({
   context,
   resolvers,
-  typeDefs });
+  typeDefs,
+  middlewares: validation
+}
+  );
+
 applyMiddleware(middleware, server);
 
 const options = {
