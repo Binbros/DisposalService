@@ -1,4 +1,3 @@
-import bcrypt from "bcryptjs";
 import dotenv from "dotenv";
 import { Context } from "graphql-yoga/dist/types";
 import jwt, { Secret } from "jsonwebtoken";
@@ -14,8 +13,7 @@ import yup from '../validations/user.schema';
 
 export const signup = async (parent: any, args: any, { models, request, response }: Context) => {
     try {
-        const password = await bcrypt.hash(args.password, 10);
-        const user = await models.user.create({ ...args, password });
+        const user = await models.user.create(args);
         await models.blacklisted.create({ user: user.id, blacklistedIps: [] });
         const token = generateAccessToken({ id: user.id });
         generateRefreshCookie({
@@ -29,12 +27,8 @@ export const signup = async (parent: any, args: any, { models, request, response
 };
 export const login = async (parent: any, args: any, { models, request, response }: Context) => {
     const user = await models.user.find({ email: args.email });
-    if (!user) {
-        throw new Error("User not found");
-    }
-    const valid = bcrypt.compare(args.password, user.password);
-    if (!valid) {
-        throw new Error("Invalid Password");
+    if (!user || !user.comparePassword(args.password)) {
+        throw new Error("Invalid user login details");
     }
     const ipAddress = request.headers["X-Forwarded-For"].split("")[0];
     const decryptedIps = jwt.verify(args.ipAddress, userSecret) as any;
