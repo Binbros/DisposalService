@@ -1,7 +1,7 @@
+import * as Mutation from './mutation'
+
 const resolvers = {
-    Query: {
-      hello: (_ : any, { name } : any) => `Hello ${name || 'World'}`,
-    },
-  }
+  Mutation,
+}
 
 export default resolvers;

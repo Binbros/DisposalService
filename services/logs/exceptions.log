@@ -1,3 +1,38 @@
-2020-03-28T11:57:13.419Z error: uncaughtException: Redis connection to localhost:6379 failed - connect ECONNREFUSED 127.0.0.1:6379
-Error: Redis connection to localhost:6379 failed - connect ECONNREFUSED 127.0.0.1:6379
-    at TCPConnectWrap.afterConnect [as oncomplete] (net.js:1126:14)
+2020-04-13T15:25:43.106Z error: uncaughtException: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/common.ts[0m:[93m45[0m:[93m1[0m - [91merror[0m[90m TS1005: [0m'}' expected.
+
+[7m45[0m 
+[7m  [0m [91m[0m
+
+  [96msrc/middleware/common.ts[0m:[93m37[0m:[93m62[0m
+    [7m37[0m export const handleLogStreaming = (router: GraphQLServer) => {
+    [7m  [0m [96m                                                             ~[0m
+    The parser expected to find a '}' to match the '{' token here.
+
+TSError: ⨯ Unable to compile TypeScript:
+[96msrc/middleware/common.ts[0m:[93m45[0m:[93m1[0m - [91merror[0m[90m TS1005: [0m'}' expected.
+
+[7m45[0m 
+[7m  [0m [91m[0m
+
+  [96msrc/middleware/common.ts[0m:[93m37[0m:[93m62[0m
+    [7m37[0m export const handleLogStreaming = (router: GraphQLServer) => {
+    [7m  [0m [96m                                                             ~[0m
+    The parser expected to find a '}' to match the '{' token here.
+
+    at createTSError (/Users/lambda/Desktop/Binbros/services/user/node_modules/ts-node/src/index.ts:421:12)
+    at reportTSError (/Users/lambda/Desktop/Binbros/services/user/node_modules/ts-node/src/index.ts:425:19)
+    at getOutput (/Users/lambda/Desktop/Binbros/services/user/node_modules/ts-node/src/index.ts:552:36)
+    at Object.compile (/Users/lambda/Desktop/Binbros/services/user/node_modules/ts-node/src/index.ts:757:32)
+    at Module.m._compile (/Users/lambda/Desktop/Binbros/services/user/node_modules/ts-node/src/index.ts:836:43)
+    at Module._extensions..js (internal/modules/cjs/loader.js:947:10)
+    at Object.require.extensions.<computed> [as .ts] (/Users/lambda/Desktop/Binbros/services/user/node_modules/ts-node/src/index.ts:839:12)
+    at Module.load (internal/modules/cjs/loader.js:790:32)
+    at Function.Module._load (internal/modules/cjs/loader.js:703:12)
+    at Module.require (internal/modules/cjs/loader.js:830:19)
+    at require (internal/modules/cjs/helpers.js:68:18)
+    at Object.<anonymous> (/Users/lambda/Desktop/Binbros/services/user/src/middleware/index.ts:1:1)
+    at Module._compile (internal/modules/cjs/loader.js:936:30)
+    at Module.m._compile (/Users/lambda/Desktop/Binbros/services/user/node_modules/ts-node/src/index.ts:836:23)
+    at Module._extensions..js (internal/modules/cjs/loader.js:947:10)
+    at Object.require.extensions.<computed> [as .ts] (/Users/lambda/Desktop/Binbros/services/user/node_modules/ts-node/src/index.ts:839:12)
