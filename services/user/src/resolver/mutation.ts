@@ -1,6 +1,9 @@
 import dotenv from "dotenv";
 import { Context } from "graphql-yoga/dist/types";
 import jwt, { Secret } from "jsonwebtoken";
+
+import email from "../publish/email.mq";
+
 import { generateAccessToken, generateRefreshCookie, refreshToken, verifyToken } from "../utils/auth";
 // import emailer from "../utils/emailer";
 dotenv.config();
@@ -20,6 +23,12 @@ export const signup = async (parent: any, args: any, { models, request, response
             address: jwt.sign({ address: [user.ipAddress] }, userSecret),
             id: user.id,
         }, response);
+        const emailObj = {
+            name: user.firstname,
+            email: user.email,
+            link: "you put the link here"
+        }
+        await email.createChannel(emailObj);
         return { ...user, token };
     } catch (err) {
         throw new Error(err.toString());

@@ -37,3 +37,9 @@ services:
       # - /rabbitmq-server:/data
     ports: 
       - "8000:8000"
+  
+  email:
+    build: 
+      context: "./services/email"
+    volumes: 
+      - ./services/email:/email
