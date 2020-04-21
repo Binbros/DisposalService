@@ -7,10 +7,11 @@ async function EmailConsumer() {
         const connect =  await amqp.connect('amqp://localhost');
         const channel = await connect.createChannel();
     
-        await channel.assertExchange('email_service','fanout',{durable: true})
+        await channel.assertExchange('email_service','topic',{durable: true})
         const q = await channel.assertQueue('', {exclusive:true})
     
-        channel.bindQueue(q.queue, 'email_service', 'verify_account')
+        channel.bindQueue(q.queue, 'email_service', 'email.#')
+        channel.prefetch(1);
     
         channel.consume(q.queue, async function(msg) {
             console.log(msg)
@@ -18,7 +19,7 @@ async function EmailConsumer() {
                 const {name, email, link} = JSON.parse(msg.content)
                 await mail(name, email, link);
             }
-        }, {noAck: true})
+        }, {noAck: false})
         
     } catch (error) {
         return process.exit(1);

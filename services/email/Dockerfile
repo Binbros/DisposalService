@@ -1,6 +1,6 @@
-FROM node:10-alpine as base
+FROM node:alpine as base
 RUN mkdir /email
 WORKDIR /email
-COPY package.json package-lock.json*  ./
+COPY . .
 RUN npm install  && npm cache clean --force 
 CMD ["node", "index.js"]
