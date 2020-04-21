@@ -1,6 +1,5 @@
 const typeDefs = `
   type Query {
-      getUser(email: String): User!
       getAllUsers:[User]!
       refresh(refreshToken: String!): String!
   }

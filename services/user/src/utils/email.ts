@@ -5,7 +5,7 @@ import * as Amqp from "amqp-ts";
 interface IUserMail {
     name: string;
     email: string;
-    link: string;
+    token: string;
     type: string;
 }
 

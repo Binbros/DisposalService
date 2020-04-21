@@ -9,7 +9,11 @@ export const encode  =  (args: any, secret: Secret , options: object) => {
     return jwt.sign(args, secret, options) as any;
 };
 export const decode = (args: any, secret: Secret) => {
-    return jwt.verify(args, secret) as any;
+    const decoded = jwt.verify(args, secret) as any;
+    if (!decoded) {
+        throw new Error("Invalid Token");
+    }
+    return decoded;
 };
 export const generateAccessToken = (args: any) => {
     const token = encode(args, appSecret, {expiresIn: "15m"});

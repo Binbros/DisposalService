@@ -1,5 +1,5 @@
 const createTransport = require('./nodemailer');
-const body = require('../../user/src/template');
+const template = require('./template')
 
 async function emailer(sender , reciever, subject, body) {
     try {
@@ -8,7 +8,7 @@ async function emailer(sender , reciever, subject, body) {
             to: reciever, // list of receivers
             subject, // Subject line
             // text: "Hello world?", // plain text body
-            html: body  
+            html: template(body) 
         })
         console.log("Message sent: %s", info.messageId);
     } catch (error) {

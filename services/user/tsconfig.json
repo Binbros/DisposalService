@@ -13,6 +13,6 @@
         "resolveJsonModule": true,                /* Include modules imported with '.json' extension */
         "forceConsistentCasingInFileNames": true   
     },
-    "include": ["**/*"],
+    "include": ["**/*", "../email/src/template.ts"],
     "exclude": ["**/*.spec.ts"]
 }

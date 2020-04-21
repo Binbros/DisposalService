@@ -7,6 +7,11 @@ const { auth, secret, logger, publishMail } = helpers;
 
 export const signup = async (parent: any, args: any, { models, request, response }: Context) => {
     try {
+        // if user email already exists handle that case
+        const userExists = await models.user.find({ email: args.email });
+        if (userExists) {
+            throw new Error("Email already exists");
+        }
         const user = await models.user.create(args);
         await models.blacklisted.create({ user: user.id, blacklistedIps: [] });
         const token = auth.generateAccessToken({ id: user.id });
@@ -14,13 +19,7 @@ export const signup = async (parent: any, args: any, { models, request, response
             address: auth.encode({ address: [user.ipAddress] }, secret.userSecret, { expiresIn: "30d" }),
             id: user.id,
         }, response);
-        const emailObj = {
-            email: user.email,
-            link: "you put the link here",
-            name: user.firstname,
-            type: "email.verify.account",
-        };
-        await publishMail(emailObj);
+        verifyEmail({ email: user.email }, models);
         return { ...user, token };
     } catch (err) {
         logger.error(err.toString());
@@ -37,7 +36,7 @@ export const login = async (parent: any, args: any, { models, request, response 
         const ipAddress = request.headers["X-Forwarded-For"].split("")[0];
         // if the user stored ipAddress does not include the ip from the headers
         if (!user.ipAddress.includes(ipAddress)) {
-            return verifyDevice({ ipAddress, id: user.id }, models);
+            return verifyDevice({ ipAddress, id: user.id, name: user.firstname, email: user.email }, models);
         }
         const token = auth.generateAccessToken({ id: user.id });
         auth.generateRefreshCookie({
@@ -55,7 +54,6 @@ export const login = async (parent: any, args: any, { models, request, response 
 export const refresh = (parent: any, args: any, { request, response }: Context) => {
     return auth.refreshToken(args, { request, response });
 };
-
 export const addDevice = async (args: any, { models, request }: Context) => {
     try {
         // get the ip address from either the argument or the  from the headers
@@ -77,34 +75,36 @@ export const addDevice = async (args: any, { models, request }: Context) => {
     }
 };
 export const verifyDevice = async (args: any, { models }: Context) => {
-    // const user = await models.blacklisted.find({ id: args.id });
-    // if(user.blacklistedIps.include(args.ipAddress)){
-    //     return emailer(
-    //         {
-    //             button: "Unblock device",
-    //             email: user.email,
-    //             message: "This device has been blocked from accesing your account",
-    //             extras: `If you did not try to access this account with this device kindly ignore`,
-    //             // link for blocking a device
-    //             // link for verifying a device
-    //             links: [``, ``],
-    //         },
-    //     );
+    const user = await models.blacklisted.find({ user: args.id });
+    const emailObj = {
+        email: args.email,
+        name: args.firstname,
+        token: auth.encode(args, secret.emailTokenSecret, { expiresIn: "1d" }),
+    };
+    if (user.blacklistedIps.include(args.ipAddress)) {
+        return publishMail({ ...emailObj, type: "email.unblock.device" });
+    }
+    return publishMail({ ...emailObj, type: "email.verify.device" });
 
-    // }
-    // return emailer(
-    //     {
-    //         button: "Verify device",
-    //         email: user.email,
-    //         message: "A different device is trying to access your account",
-    //         extras: `If you did not try to access this account kindly block the device`,
-    //         // link for blocking a device
-    //         // link for verifying a device
-    //         links: [``, ``],
-    //     },
-    // );
 };
-
+export const verifyEmail = async (args: any, { models }: Context) => {
+    try {
+        const user = await models.user.find(args);
+        if (!user || !user.email) {
+            throw new Error("Invalid Email address");
+        }
+        const emailObj = {
+            email: user.email,
+            name: user.firstname,
+            token: auth.encode(args, secret.emailTokenSecret, { expiresIn: "1d" }),
+            type: args.type || "email.verify.account",
+        };
+        return publishMail(emailObj);
+    } catch (err) {
+        logger.error(err.toString());
+        throw new Error(err.toString());
+    }
+};
 export const blackListDevice = async (args: any, { models }: Context) => {
     try {
         const decoded = auth.decode(args.token, secret.emailTokenSecret);
@@ -117,7 +117,6 @@ export const blackListDevice = async (args: any, { models }: Context) => {
         throw new Error(err.toString());
     }
 };
-
 export const unblockDevice = async (args: any, { models }: Context) => {
     try {
         const decoded = auth.decode(args.token, secret.emailTokenSecret);
@@ -130,7 +129,58 @@ export const unblockDevice = async (args: any, { models }: Context) => {
         throw new Error(err.toString());
     }
 };
-export const
+export const confirmMail = async (args: any, { models }: Context) => {
+    try {
+        const decoded = auth.decode(args.token, secret.emailTokenSecret);
+        const verifiedUser = await models.user.findOneAndUpdate({ id: decoded.id }, {
+            verified: true,
+        });
+        return verifiedUser;
+    } catch (err) {
+        logger.error(err.toString());
+        throw new Error(err.toString());
+    }
+};
+
+export const forgotPassword = async (args: any, { models }: Context) => {
+    return verifyEmail({ email: args.email, type: "email.forgot.password" }, models);
+};
+
+export const verifyPasswordToken = async (args: any) => {
+    try {
+        const decoded = auth.decode(args.token, secret.emailTokenSecret);
+        return decoded.id;
+    } catch (err) {
+        logger.error(err.toString());
+        throw new Error(err.toString());
+    }
+};
+
+export const resetPassword = async (args: any, { models }: Context) => {
+    try {
+       const {id, password} = args;
+       const result = await models.user.findOneAndUpdate({id}, {password});
+       return result;
+    } catch (err) {
+        logger.error(err.toString());
+        throw new Error(err.toString());
+    }
+};
+export const changePassword = async (args: any, { models }: Context) => {
+    const {id, password, newpassword } = args;
+    try {
+        const user = await models.user.find({ id });
+        if (!user.comparePassword(password)) {
+            throw new Error("Invalid password");
+        }
+        await models.user.updateOne({ id }, {password: newpassword});
+        return user;
+
+    } catch (err) {
+        logger.error(err.toString());
+        throw new Error(err.toString());
+    }
+};
 
 const resolver = {
     Mutation: {
@@ -149,10 +199,9 @@ const resolver = {
 
     },
     Query: {
-        getAllUsers: "",
-        getUser: "",
+        getUsers: "",
         refresh,
     },
 };
 
-export default resolver ;
+export default resolver;
