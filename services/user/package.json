@@ -25,6 +25,7 @@
     "graphql-yoga": "^1.18.3",
     "jest": "^25.3.0",
     "jsonwebtoken": "^8.5.1",
+    "mailgen": "^2.0.10",
     "mongoose": "^5.9.7",
     "morgan": "^1.10.0",
     "redis": "^3.0.2",

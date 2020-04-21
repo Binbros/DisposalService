@@ -3,6 +3,7 @@ import { GraphQLServer } from "graphql-yoga";
 import * as auth from "./auth";
 import logger from './logger';
 import secret from "./secret";
+import publishMail from "./publishEmail";
 
 type Wrapper =  ((router: GraphQLServer) => void);
 type Handler = (
@@ -24,4 +25,5 @@ export default({
     auth,
     logger,
     secret,
+    publishMail,
   });

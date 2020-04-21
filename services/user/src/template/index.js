@@ -1,7 +1,7 @@
 "use strict"
 
 const Mailgen = require('mailgen');
-const verifyAccount = require('./verify.user');
+const emailTemplate = require('./template');
 
 class MailGenerator {
     constructor() {
@@ -10,15 +10,16 @@ class MailGenerator {
             product: {
                 // Appears in header & footer of e-mails
                 name: 'Binbro',
-                link: 'https://mailgen.js/'
+                link: 'https://mailgen.js/',
                 // Optional product logo
                 // logo: 'https://mailgen.js/img/logo.png'
+                copyright: 'Copyright © 2020 Binbro. All rights reserved.',
             }
         })
     }
 
-    verifyAccount(name, link) {
-        return this.mail.generate(verifyAccount(name,link));
+    message(content) {
+        return this.mail.generate(emailTemplate(content));
     }
 }
 

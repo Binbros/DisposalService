@@ -1,6 +1,6 @@
 "use strict"
 const amqp = require('amqplib/callback_api');
-const mail = require('../sendemail/verify.user.email');
+const mail = require('./emailer');
 
 async function EmailConsumer() {
     try {
@@ -16,10 +16,10 @@ async function EmailConsumer() {
         channel.consume(q.queue, async function(msg) {
             console.log(msg)
             if (msg.content) {
-                const {name, email, link} = JSON.parse(msg.content)
-                await mail(name, email, link);
+                const {sender , reciever , subject , body } = JSON.parse(msg.content)
+                await mail(sender , reciever, subject ,body);
             }
-        }, {noAck: false})
+        }, {noAck: true})
         
     } catch (error) {
         return process.exit(1);

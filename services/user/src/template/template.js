@@ -1,13 +1,14 @@
-function email(name, link) {
+function email(content) {
+    const {name, text, buttonText , links} = content
     return {
         name,
-        intro: 'Welcome to Mailgen! We\'re very excited to have you on board.',
+        intro: text[0],
         action: {
-            instructions: 'To enjoy full acess services with Binbro, please click here:',
+            instructions: text[1],
             button: {
                 color: '#22BC66', // Optional action button color
-                text: 'Confirm your account',
-                link
+                text: buttonText,
+                link: links[0]
             }
         },
         outro: 'Need help, or have questions? Just reply to this email, we\'d love to help.'
