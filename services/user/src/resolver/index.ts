@@ -1,7 +1,8 @@
-import userResolver from './mutation'
+import userResolver from "./user"
 
 const resolvers = {
-  userResolver,
+...userResolver,
 }
+;
 
-export default resolvers;
+export default resolvers as any;

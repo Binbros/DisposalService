@@ -1,5 +1,6 @@
 
 import { Context } from "graphql-yoga/dist/types";
+import email from "../publish/email.mq";
 import helpers from "../utils";
 import yup from "../validations/user.schema";
 
@@ -14,6 +15,12 @@ export const signup = async (parent: any, args: any, { models, request, response
             address: auth.encode({ address: [user.ipAddress] }, secret.userSecret, { expiresIn: "30d" }),
             id: user.id,
         }, response);
+        const emailObj = {
+            email: user.email,
+            link: "you put the link here",
+            name: user.firstname, 
+        };
+        await email(emailObj);
         return { ...user, token };
     } catch (err) {
         logger.error(err.toString());
@@ -123,6 +130,7 @@ export const unblockDevice = async (args: any, { models }: Context) => {
         throw new Error(err.toString());
     }
 };
+export const 
 
 const resolver = {
     Mutation: {
@@ -147,4 +155,4 @@ const resolver = {
     },
 };
 
-export default resolver;
+export default resolver ;

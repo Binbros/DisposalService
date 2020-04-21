@@ -1,15 +1,13 @@
 
 import dotenv from "dotenv";
-import express from "express";
 import { GraphQLServer } from "graphql-yoga";
-import redis from "redis";
 import db from "./config/db";
 import context from "./context";
 import middleware from "./middleware/index";
-import resolvers from "./resolver";
+import * as resolvers from "./resolver";
 import typeDefs from "./typedefs";
 import validation from "./validations";
-import { applyMiddleware, applyRoutes } from "./utils";
+import { applyMiddleware } from "./utils";
 import logger from "./utils/logger";
 
 dotenv.config();
