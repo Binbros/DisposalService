@@ -1,9 +1,10 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { GraphQLServer } from "graphql-yoga";
 import * as auth from "./auth";
-import publishMail from "./email";
 import logger from "./logger";
 import secret from "./secret";
+import verifyEmail from "./verifyEmail";
+import verifyDevice from "./verifyDevice";
 
 type Wrapper =  ((router: GraphQLServer) => void);
 type Handler = (
@@ -24,7 +25,7 @@ export const applyMiddleware = (
 export default({
     auth,
     logger,
-    publishMail,
     secret,
-
+    verifyDevice,
+    verifyEmail,
   });

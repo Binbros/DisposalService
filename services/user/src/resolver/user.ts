@@ -3,9 +3,20 @@ import { Context } from "graphql-yoga/dist/types";
 import helpers from "../utils";
 import yup from "../validations/user.schema";
 
-const { auth, secret, logger, publishMail } = helpers;
-
-export const signup = async (parent: any, args: any, { models, request, response }: Context) => {
+const { auth, secret, logger, verifyEmail, verifyDevice } = helpers;
+export const getUsers = async (parent: any, args: any, { models }: Context) => {
+    try {
+        const users = await models.user.find({});
+        if (!users) {
+            throw new Error("No user found");
+        }
+        return users;
+    } catch (err) {
+        logger.error(err.toString());
+        throw new Error(err.toString());
+    }
+};
+export const signup = async (parent: any, args: any, { models, response }: Context) => {
     try {
         // if user email already exists handle that case
         const userExists = await models.user.find({ email: args.email });
@@ -19,7 +30,7 @@ export const signup = async (parent: any, args: any, { models, request, response
             address: auth.encode({ address: [user.ipAddress] }, secret.userSecret, { expiresIn: "30d" }),
             id: user.id,
         }, response);
-        verifyEmail({ email: user.email }, models);
+        verifyEmail({ email: user.email, type: "email.verify.account" }, models);
         return { ...user, token };
     } catch (err) {
         logger.error(err.toString());
@@ -32,9 +43,7 @@ export const login = async (parent: any, args: any, { models, request, response 
         if (!user || !user.comparePassword(args.password)) {
             throw new Error("Invalid user login details");
         }
-        // get the ip address from the header
         const ipAddress = request.headers["X-Forwarded-For"].split("")[0];
-        // if the user stored ipAddress does not include the ip from the headers
         if (!user.ipAddress.includes(ipAddress)) {
             return verifyDevice({ ipAddress, id: user.id, name: user.firstname, email: user.email }, models);
         }
@@ -61,7 +70,7 @@ export const addDevice = async (args: any, { models, request }: Context) => {
         const ipAddress = args.ipAddress || request.headers["X-Forwarded-For"].split("")[0];
         const decoded = auth.verifyToken(request) || auth.decode(args.token, secret.emailTokenSecret);
         // get the user details
-        const user = await models.user.find({ id: decoded.id || args.id });
+        const user = await models.user.findById(decoded.id || args.id);
         const addingDevice = await models.user.update({ id: user.id },
             {
                 deviceNames: [...user.deviceNames, args.deviceName],
@@ -74,41 +83,11 @@ export const addDevice = async (args: any, { models, request }: Context) => {
         throw new Error(err.toString());
     }
 };
-export const verifyDevice = async (args: any, { models }: Context) => {
-    const user = await models.blacklisted.find({ user: args.id });
-    const emailObj = {
-        email: args.email,
-        name: args.firstname,
-        token: auth.encode(args, secret.emailTokenSecret, { expiresIn: "1d" }),
-    };
-    if (user.blacklistedIps.include(args.ipAddress)) {
-        return publishMail({ ...emailObj, type: "email.unblock.device" });
-    }
-    return publishMail({ ...emailObj, type: "email.verify.device" });
 
-};
-export const verifyEmail = async (args: any, { models }: Context) => {
-    try {
-        const user = await models.user.find(args);
-        if (!user || !user.email) {
-            throw new Error("Invalid Email address");
-        }
-        const emailObj = {
-            email: user.email,
-            name: user.firstname,
-            token: auth.encode(args, secret.emailTokenSecret, { expiresIn: "1d" }),
-            type: args.type || "email.verify.account",
-        };
-        return publishMail(emailObj);
-    } catch (err) {
-        logger.error(err.toString());
-        throw new Error(err.toString());
-    }
-};
 export const blackListDevice = async (args: any, { models }: Context) => {
     try {
         const decoded = auth.decode(args.token, secret.emailTokenSecret);
-        const user = await models.blacklisted.findOne({ user: decoded.id });
+        const user = await models.blacklisted.find({ user: decoded.id });
         const blacklistingDevice = await models.blacklisted.update({ user: user.id },
             { blacklistedIps: [...user.blacklistedIps, decoded.ipAddress] });
         return blacklistingDevice;
@@ -120,7 +99,7 @@ export const blackListDevice = async (args: any, { models }: Context) => {
 export const unblockDevice = async (args: any, { models }: Context) => {
     try {
         const decoded = auth.decode(args.token, secret.emailTokenSecret);
-        const blacklist = await models.blacklisted.find({ user: decoded.id });
+        const blacklist = await models.blacklisted.findById(decoded.id);
         const unblockedIp = blacklist.blacklistedIps.pop(blacklist.blacklistedIps.indexOf(decoded.ipAddress));
         models.blacklisted.update({ user: decoded.id }, { blacklistedIps: blacklist });
         return addDevice({ ipAddress: unblockedIp, id: decoded.id }, { models });
@@ -141,39 +120,33 @@ export const confirmMail = async (args: any, { models }: Context) => {
         throw new Error(err.toString());
     }
 };
+export const retryVerify = async (args: any, { models }: Context) => {
+    return verifyEmail({ email: args.email, type: "email.verify.account" }, models);
+};
 
 export const forgotPassword = async (args: any, { models }: Context) => {
     return verifyEmail({ email: args.email, type: "email.forgot.password" }, models);
 };
 
-export const verifyPasswordToken = async (args: any) => {
-    try {
-        const decoded = auth.decode(args.token, secret.emailTokenSecret);
-        return decoded.id;
-    } catch (err) {
-        logger.error(err.toString());
-        throw new Error(err.toString());
-    }
-};
-
 export const resetPassword = async (args: any, { models }: Context) => {
     try {
-       const {id, password} = args;
-       const result = await models.user.findOneAndUpdate({id}, {password});
-       return result;
+        const { password, token } = args;
+        const decoded = auth.decode(token, secret.emailTokenSecret);
+        const result = await models.user.findOneAndUpdate({ id: decoded.id }, { password });
+        return result;
     } catch (err) {
         logger.error(err.toString());
         throw new Error(err.toString());
     }
 };
 export const changePassword = async (args: any, { models }: Context) => {
-    const {id, password, newpassword } = args;
+    const { id, password, newpassword } = args;
     try {
         const user = await models.user.find({ id });
         if (!user.comparePassword(password)) {
             throw new Error("Invalid password");
         }
-        await models.user.updateOne({ id }, {password: newpassword});
+        await models.user.updateOne({ id }, { password: newpassword });
         return user;
 
     } catch (err) {
@@ -186,20 +159,23 @@ const resolver = {
     Mutation: {
         addDevice,
         blackListDevice,
+        changePassword,
+        confirmMail,
+        forgotPassword,
         login: {
             resolve: login,
             validateSignup: yup.login(),
         },
+        resetPassword,
+        retryVerify,
         signup: {
             resolve: signup,
             validateSignup: yup.signup(),
         },
         unblockDevice,
-        verifyDevice,
-
     },
     Query: {
-        getUsers: "",
+        getUsers,
         refresh,
     },
 };

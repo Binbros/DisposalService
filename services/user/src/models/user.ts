@@ -1,4 +1,4 @@
-import bcrypt from 'bcryptjs';
+import bcrypt from "bcryptjs";
 import mongoose, { Document, Schema } from "mongoose";
 
 export interface IUser extends Document {
@@ -8,20 +8,18 @@ export interface IUser extends Document {
     phoneNumber: number;
     password: string;
     verified: boolean;
-    devicesNames: [string];
-    verifiedIps: [string];
+    devices: [object];
     useSecondAuth: boolean;
 }
 
 const userSchema: Schema = new Schema({
-    devicesNames: {type : Array , default: [""]},
+    devices: { type: Array, default: [] },
     email: { type: String, required: true, unique: true },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     password: { type: String, required: true },
     phoneNumber: { type: Number, required: true, unique: true },
     verified: { type: Boolean, default: false },
-    verifiedIps: { type: Array, default: [""] },
     // tslint:disable-next-line: object-literal-sort-keys
     useSecondAuth: {type: Boolean , default: false},
 });

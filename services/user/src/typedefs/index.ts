@@ -4,25 +4,35 @@ const typeDefs = `
       refresh(refreshToken: String!): String!
   }
   type Mutation {
-    signup(data: signupDetails): Auth
-    login(data: loginDetails): Auth
-    addDevice(ipAddress: String , deviceName: String ): [String!]!
-    unblockDevice(token: String): Object!
-    blacklistDevice(token: String): Object!
-    verifyDevice
+    signup(data: signupDetails): User!
+    login(data: loginDetails): User
+    addDevice(ipAddress: String , deviceName: String ): User!
+    unblockDevice(token: String): User!
+    blacklistDevice(token: String): [Device!]!
+    changePassword(data: changePassword): User!
+    confirmMail(token : String): User!
+    forgotPassword(email : String): null
+    resetPassword (token: String, password: String): User!
+    retryVerify(email: String): null
   }
-
   type User {
     id: ID!
     firstname: String!
     lastname: String!
-    password: String!
     PhoneNumber:String!
     verified: Boolean!
-    verifiedIps: [String!]!
-    platforms: [String!]!
+    devices: [Device!]!
   }
-
+  type Device {
+    id: ID!
+    user: Number!
+    blacklistedIps: String!
+  }
+  input changePassword {
+    id: ID!
+    password: String!
+    newpassword: String!
+  }
   input signupDetails{
     email: String
     firstname: String
