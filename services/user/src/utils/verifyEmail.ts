@@ -1,8 +1,8 @@
 import { Context } from "graphql-yoga/dist/types";
+import * as auth from "./auth";
 import publishMail from "./email";
-import helpers from "./index";
-
-const {auth, secret, logger } = helpers;
+import logger from "./logger"
+import secret from "./secret";
 
 const verifyEmail = async (args: any, {models}: Context) => {
     try {
@@ -11,9 +11,13 @@ const verifyEmail = async (args: any, {models}: Context) => {
             throw new Error("Invalid Email address");
         }
         const emailObj = {
-            email: user.email,
-            name: user.firstname,
-            token: auth.encode(args, secret.emailTokenSecret, { expiresIn: "1d" }),
+            body : {
+                name: args.firstname,
+                token: auth.encode({id: args.id}, secret.emailTokenSecret, { expiresIn: "1d" }),
+            },
+            reciever : args.email,
+            sender: `${secret.senderEmail}`,
+            subject: "Account Verification",
             type: args.type,
         };
         return publishMail(emailObj);

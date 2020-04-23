@@ -1,9 +1,9 @@
 
 import { Context } from "graphql-yoga/dist/types";
 import jwt, {Secret} from "jsonwebtoken";
-import helpers from "./index";
+import secrets from "./secret";
 
-const {appSecret, refreshSecret} = helpers.secret;
+const {appSecret, refreshSecret} = secrets;
 
 export const encode  =  (args: any, secret: Secret , options: object) => {
     return jwt.sign(args, secret, options) as any;
@@ -36,7 +36,7 @@ export const refreshToken = (args: any, {request, response}: Context) => {
         throw new Error ("No Refresh Token found");
     }
     generateRefreshCookie(args, response);
-    return generateAccessToken(args);
+    return generateAccessToken({id: args.id});
 };
 
 export const verifyToken = ({request}: Context) => {

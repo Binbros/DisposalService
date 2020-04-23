@@ -1,10 +1,11 @@
-import dotenv from "dotenv";
+import {config} from "dotenv";
 import {Secret} from "jsonwebtoken";
-dotenv.config();
+config();
 export default ({
     appSecret : process.env.APP_SECRET as Secret,
     emailTokenSecret: process.env.EMAIL_TOKEN_SECRET as Secret,
     refreshSecret: process.env.REFRESH_SECRET as Secret,
-    resetPage: process.env.RESET_PAGE as Secret,
+    senderEmail: process.env.SENDER_EMAIL as string,
     userSecret : process.env.USER_SECRET as Secret,
+
 });

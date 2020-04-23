@@ -3,17 +3,18 @@
 import * as Amqp from "amqp-ts";
 
 interface IUserMail {
-    name: string;
-    email: string;
-    token: string;
+    sender: string;
+    reciever: string;
+    body: object;
     type: string;
+    subject: string;
 }
 
 async function publishMail(msg: IUserMail)  {
     const connection = new Amqp.Connection("amqp://localhost");
     // const connection =  await amqp.connect("amqp://localhost");
     // const channel = await connection.createChannel();
-    const exchange = connection.declareExchange("email-service", "topic", {durable: true});
+    const exchange = connection.declareExchange("email_service", "direct", {durable: true});
 
     // await channel.assertExchange("email_service", "fanout", {durable: true});
     await connection.completeConfiguration();

@@ -6,7 +6,7 @@ const typeDefs = `
   type Mutation {
     signup(data: signupDetails): User!
     login(data: loginDetails): User
-    addDevice(ipAddress: String , deviceName: String ): User!
+    addDevice(deviceName: String ): User!
     unblockDevice(token: String): User!
     blacklistDevice(token: String): [Device!]!
     changePassword(data: changePassword): User!
@@ -21,12 +21,16 @@ const typeDefs = `
     lastname: String!
     PhoneNumber:String!
     verified: Boolean!
-    devices: [Device!]!
+    devices: [VerifiedDevices]!
   }
   type Device {
     id: ID!
     user: Number!
     blacklistedIps: String!
+  }
+  type VerifiedDevices {
+    ipAddress: String!
+    deviceName: String!
   }
   input changePassword {
     id: ID!
