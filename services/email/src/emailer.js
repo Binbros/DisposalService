@@ -1,14 +1,15 @@
-const createTransport = require('./nodemailer');
-const template = require('./template')
+import createTransport from './nodemailer';
+import { generate } from './mailgen';
+import message from './messages';
 
-async function emailer(sender , reciever, subject, body) {
+async function emailer(sender , reciever , body, type) {
     try {
        const info = await createTransport().sendMail({
             from: sender || '"Fred Foo 👻" <foo@example.com>', // sender address
             to: reciever, // list of receivers
-            subject, // Subject line
+            subject: template.subject, // Subject line
             // text: "Hello world?", // plain text body
-            html: template(body) 
+            html: generate(message(type, body))
         })
         console.log("Message sent: %s", info.messageId);
     } catch (error) {
@@ -16,4 +17,4 @@ async function emailer(sender , reciever, subject, body) {
     }
 }
 
-module.exports = emailer;
+export default emailer;
