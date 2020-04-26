@@ -1,5 +1,5 @@
-import secret from "../../utils/secret";
-export default (info) => {
+const secret = require("../../utils/secret");
+module.exports = (info) => {
   return {
     body: {
       name: info.name,
@@ -16,6 +16,11 @@ export default (info) => {
         },
         {
           instructions: "This link expires in 24 hours",
+          button: {
+            color: "", // Optional action button color
+            text: "",
+            link: '',
+          },
         },
       ],
       outro: `If you did not make this request, no further action is required on your part`,

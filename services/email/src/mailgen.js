@@ -1,7 +1,7 @@
 "use strict";
 
-import Mailgen from "mailgen";
-const mailGenerator = new Mailgen({
+const Mailgen = require("mailgen");
+const mailgen =new Mailgen({
         theme: "cerberus",
         product: {
             // Appears in header & footer of e-mails
@@ -13,4 +13,5 @@ const mailGenerator = new Mailgen({
         },
     });
 
-export default mailGenerator;
+
+module.exports = mailgen

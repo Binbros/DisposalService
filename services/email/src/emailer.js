@@ -1,20 +1,22 @@
-import createTransport from './nodemailer';
-import { generate } from './mailgen';
-import message from './messages';
+const createTransport = require ('./nodemailer');
+const mailgen = require('./mailgen')
+const message =require('./messages');
 
-async function emailer(sender , reciever , body, type) {
+module.exports = async function emailer(sender , reciever ,subject, body, type) {
+    const messageBody = await message(type, body)
     try {
-       const info = await createTransport().sendMail({
-            from: sender || '"Fred Foo 👻" <foo@example.com>', // sender address
+        const mailer = await createTransport()
+       const info = await mailer.sendMail({
+            from: '"Fred Foo 👻" <foo@example.com>', // sender address
             to: reciever, // list of receivers
-            subject: template.subject, // Subject line
+            subject: subject, // Subject line
             // text: "Hello world?", // plain text body
-            html: generate(message(type, body))
+            html: mailgen.generate(messageBody)
         })
-        console.log("Message sent: %s", info.messageId);
+
+        console.log("Message sent: %s", info);
     } catch (error) {
-        return process.exit(1)
+      console.log(error)
     }
 }
 
-export default emailer;

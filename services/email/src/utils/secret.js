@@ -1,7 +1,5 @@
-import { config } from 'dotenv'
+const { config } = require ('dotenv')
 
 config()
 
-export default({
-    frontUrl : process.env.FRONT_URL
-})
+module.exports = {frontUrl : process.env.FRONT_URL}

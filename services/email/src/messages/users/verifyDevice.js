@@ -1,5 +1,5 @@
-import secret from "../../utils/secret";
-export default (info) => {
+const secret = require("../../utils/secret");
+module.exports = (info) => {
   return {
     body: {
       name: info.name,
@@ -17,11 +17,22 @@ export default (info) => {
         },
         {
           instructions: "This link expires in 24 hours",
+          button: {
+            color: "", // Optional action button color
+            text: "",
+            link: '',
+          },
         },
-      ],
-      outro: `If the action was not prompted by you, kindly block the device by clicking ${[
-        here,
-      ](secret.fronturl)}/block?s=${info.secondToken}})`,
+        {
+            instructions:
+              "If the action was not prompted by you, kindly block the device by clicking below",
+            button: {
+              color: "#22BC66", // Optional action button color
+              text: "Block Device",
+              link: `${secret.fronturl}/block?s=${info.secondToken}`,
+            },
+          },
+      ]
     },
   };
 };

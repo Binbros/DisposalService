@@ -1,29 +1,23 @@
 "use strict"
-import { connect as _connect } from 'amqplib/callback_api';
-import mail from './emailer';
-import queues from './utils/queues';
+const amqp=  require ('amqplib');
+const mail = require('./emailer');
+const queues  = require('./utils/queues');
 
 const queues_array = [ 'verify_account', 'verify_device', 'unblock_device', 'forgot_password']
 
-async function EmailConsumer() {
+module.exports = async function EmailConsumer() {
     try {
-        const connect =  await _connect('amqp://localhost');
-        const channel = await connect.createChannel();
-    
-        await channel.assertExchange('email_service','topic',{durable: true})
-        queues(channel, queues_array, 'email_service')
+        let conn =  await amqp.connect('amqp://localhost');
+ 
+        let channel = await conn.createChannel();
+     
+        await channel.assertExchange('email_service','direct',{durable: true})
         channel.prefetch(1);
-        channel.consume(q.queue, async function(msg) {
-            console.log(msg)
-            if (msg.content) {
-                const {sender, reciever, subject, body , type} = JSON.parse(msg.content)
-                await mail(sender, reciever ,subject, body, type);
-            }
-        }, {noAck: true})
-        
+        queues(channel, queues_array, 'email_service')
+
     } catch (error) {
-        return process.exit(1);
+       console.log(error)
     }
 }
-export default EmailConsumer;
+
 

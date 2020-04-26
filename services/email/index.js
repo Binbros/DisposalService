@@ -1,3 +1,5 @@
+const http = require('http')
 const email = require('./src/subscribeEmails');
 
-email().then((res) => console.log(res)).catch(err=> console.error(err))
+const server = http.createServer((req, res) => {email()})
+server.listen(2020,() => {console.log('Email service is running on port 2020')})
