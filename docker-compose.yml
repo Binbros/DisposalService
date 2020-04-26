@@ -43,6 +43,11 @@ services:
     environment: 
       - NODE_ENV=production
       - MONGO_URI
+      - APP_SECRET=Binbro2020
+      - REFRESH_SECRET=Binbro2020Refresh
+      - USER_SECRET=BinbroIPAddress
+      - EMAIL_TOKEN_SECRET=BinbroEmailer
+      - SENDER_EMAIL=ogbonnabasilcea@gmail.com
     volumes: 
       - ./services/user:/user
     ports: 
@@ -50,5 +55,12 @@ services:
   email:
     build: 
       context: "./services/email"
+    depends_on:
+      - "rabbitmq"
+    command: dockerize -wait tcp://rabbitmq:5672 -timeout 60s
+    environment: 
+      - FRONT_URL=http://binbro.com
+    ports: 
+      - "2020:2020"
     volumes: 
       - ./services/email:/email

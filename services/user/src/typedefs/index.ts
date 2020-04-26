@@ -1,48 +1,55 @@
 const typeDefs = `
   type Query {
       getAllUsers:[User]!
-      refresh(refreshToken: String!): String!
+      refresh(id: ID!): String!
   }
   type Mutation {
-    signup(data: signupDetails): User!
-    login(data: loginDetails): User
-    addDevice(deviceName: String ): User!
-    unblockDevice(token: String): User!
+    addDevice(deviceName: String ,ipAddress: String): User
     blacklistDevice(token: String): [Device!]!
     changePassword(data: changePassword): User!
     confirmMail(token : String): User!
-    forgotPassword(email : String): null
+    forgotPassword(email : String): String
+    login(input: loginDetails): Auth!
+    unblockDevice(token: String): User!
     resetPassword (token: String, password: String): User!
-    retryVerify(email: String): null
+    retryVerify(email: String): String
+    signup(input: signupDetails): Auth!
+  }
+  type Auth {
+    user: User!
+    token: String!
   }
   type User {
     id: ID!
-    firstname: String!
-    lastname: String!
-    PhoneNumber:String!
+    firstName: String!
+    lastName: String!
+    email: String!
+    phoneNumber:Float!
     verified: Boolean!
     devices: [VerifiedDevices]!
+    ignorePrompt: Boolean!
+    useSecondAuth: Boolean!
   }
   type Device {
     id: ID!
-    user: Number!
+    user: Float!
     blacklistedIps: String!
   }
   type VerifiedDevices {
-    ipAddress: String!
-    deviceName: String!
+    ipAddress: String
+    deviceName: String
   }
   input changePassword {
     id: ID!
     password: String!
-    newpassword: String!
+    newPassword: String!
   }
   input signupDetails{
-    email: String
-    firstname: String
-    lastname: String
-    password: String
-    PhoneNumber:Int,
+    email: String!
+    firstName: String!
+    lastName: String!
+    password: String!
+    phoneNumber:Float!
   }
 
   input loginDetails{

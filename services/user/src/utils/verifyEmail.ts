@@ -4,9 +4,9 @@ import publishMail from "./email";
 import logger from "./logger"
 import secret from "./secret";
 
-const verifyEmail = async (args: any, {models}: Context) => {
+const verifyEmail = async (args: any, models: Context) => {
     try {
-        const user = await models.user.find(args);
+        const user = await models.user.findOne({email: args.email});
         if (!user || !user.email) {
             throw new Error("Invalid Email address");
         }

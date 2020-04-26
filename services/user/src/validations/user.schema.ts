@@ -8,7 +8,7 @@ export default class UserSchema {
             email: yup.string().email(),
             firstname: yup.string().trim().required()
                 .min(2, "First name is too short"),
-            lastName: yup.string().trim().required()
+            lastname: yup.string().trim().required()
                 .min(2, "Last name is too short"),
             password: yup.string().required()
                 .min(6, "Password must be atleast 6 digit"),
