@@ -1,38 +1,27 @@
 version: "3.7"
 services:
   rabbitmq: 
-    image: rabbitmq:3-management-alpine
+    image: 'rabbitmq:3-management-alpine'
     container_name: rabbitmq
     volumes:
       - ./.docker/rabbitmq/etc/:/etc/rabbitmq/
       - ./.docker/rabbitmq/data/:/var/lib/rabbitmq/
       - ./.docker/rabbitmq/logs/:/var/log/rabbitmq/
-    environment:
-        RABBITMQ_ERLANG_COOKIE: ${RABBITMQ_ERLANG_COOKIE}
-        RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
-        RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
     ports:
         - 5672:5672
         - 15672:15672
   redis:
     build:
       context: "./services/redis-image"
-  # disposal:
-  #   build:
-  #     context: "./services/disposal"
-  #   environment:
-  #     - REDIS_HOST=redis
-  #     - REDIS_PORT=6379
-  #     - LOGTOKEN=e9adc299-0cd0-477c-9fd3-51d74e91c36a
-  #     - NODE_ENV=production
-  #   volumes:
-  #     - /disposal/node_modules
-  #     - ./services/disposal:/disposal
-  #   ports:
-  #     - "3000:3000"
 
   mongo:
-    image: mongo
+    image: mongo:latest
+    environment:
+      - MONGO_INITDB_DATABASE=strapi 
+      # MONGO_INITDB_ROOT_USERNAME: root
+      # MONGO_INITDB_ROOT_PASSWORD: rootpassword
+    # ports: 
+    #   - 27017:27017
     healthcheck:
       test: echo 'db.runCommand("ping").ok' | mongo localhost:27017/test --quiet
 
@@ -42,7 +31,7 @@ services:
       target: dev
     environment: 
       - NODE_ENV=production
-      - MONGO_URI
+      - MONGO_URI=mongodb://mongo:27017/users
       - APP_SECRET=Binbro2020
       - REFRESH_SECRET=Binbro2020Refresh
       - USER_SECRET=BinbroIPAddress

@@ -13,11 +13,11 @@ import validation from "./validations";
 dotenv.config();
 process.on("uncaughtException", (e) => {
   logger.error("uncaught exception ", e);
-  process.exit(1);
+  // process.exit(1);
 });
 process.on("unhandledRejection", (e) => {
   logger.error("Unhandled Promise rejection", e);
-  process.exit(1);
+  // process.exit(1);
 });
 
 db();
@@ -37,7 +37,6 @@ const options = {
   playground: "/",
   port: 8000,
   subscriptions: "/subscriptions",
-
 };
 
 // tslint:disable-next-line: no-shadowed-variable

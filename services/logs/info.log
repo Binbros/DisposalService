@@ -1,0 +1,16 @@
+2020-05-02T09:53:15.727Z warn: Server started, listening on port 8000 for incoming requests.
+2020-05-02T09:53:28.570Z info: ::1 - - [02/May/2020:09:53:28 +0000] "POST /users HTTP/1.1" 200 - "http://localhost:8000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36"
+
+2020-05-02T09:53:30.606Z info: ::1 - - [02/May/2020:09:53:30 +0000] "POST /users HTTP/1.1" 200 - "http://localhost:8000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36"
+
+2020-05-02T09:53:30.916Z info: ::1 - - [02/May/2020:09:53:30 +0000] "POST /users HTTP/1.1" 200 62 "http://localhost:8000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36"
+
+2020-05-02T09:53:31.100Z error: Unhandled Promise rejectiongetaddrinfo ENOTFOUND rabbitmq rabbitmq:5672
+2020-05-02T09:53:50.088Z info: ::1 - - [02/May/2020:09:53:50 +0000] "POST /users HTTP/1.1" 200 - "http://localhost:8000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36"
+
+2020-05-02T09:53:51.102Z error: Error: Email already exists
+2020-05-02T09:53:51.130Z info: ::1 - - [02/May/2020:09:53:51 +0000] "POST /users HTTP/1.1" 200 120 "http://localhost:8000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36"
+
+2020-05-02T09:53:52.111Z info: ::1 - - [02/May/2020:09:53:52 +0000] "POST /users HTTP/1.1" 200 - "http://localhost:8000/" "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/81.0.4044.129 Safari/537.36"
+
+2020-05-02T09:54:33.286Z warn: Server started, listening on port 8000 for incoming requests.
