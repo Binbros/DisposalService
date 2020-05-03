@@ -7,7 +7,7 @@ module.exports = async function emailer(sender , reciever ,subject, body, type) 
     try {
         const mailer = await createTransport()
        const info = await mailer.sendMail({
-            from: '"Fred Foo 👻" <foo@example.com>', // sender address
+            from: 'noreply@binbro.com', // sender address
             to: reciever, // list of receivers
             subject: subject, // Subject line
             // text: "Hello world?", // plain text body

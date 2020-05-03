@@ -10,7 +10,7 @@ interface IUserMail {
 }
 
 async function publishMail(msg: IUserMail)  {
-    const connection =  await amqp.connect('amqp://rabbitmq?connection_attempts=5&retry_delay=5');
+    const connection =  await amqp.connect("amqp://guest:guest@rabbitmq:5672?connection_attempts=5&retry_delay=5");
     const channel = await connection.createChannel();
     await channel.assertExchange("email_service", "direct", {durable: true});
     channel.publish("email_service", msg.type, Buffer.from(JSON.stringify(msg)));
