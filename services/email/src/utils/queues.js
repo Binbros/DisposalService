@@ -6,7 +6,12 @@ return queues_array.forEach(async queue => {
     channel.consume(q.queue, async function(msg) {
         if (msg.content) {
             const {sender, reciever, subject, body , type} = JSON.parse(msg.content)
-            await mail(sender, reciever ,subject, body, type);
+            try {
+                await mail(sender, reciever ,subject, body, type);
+                channel.ack(msg)
+            } catch (error) {
+                channel.noack(msg)
+            }
         }
     }, {noAck: true})
 })

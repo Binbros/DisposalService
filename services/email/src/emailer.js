@@ -4,7 +4,7 @@ const message =require('./messages');
 
 module.exports = async function emailer(sender , reciever ,subject, body, type) {
     const messageBody = await message(type, body)
-    try {
+    // try {
         const mailer = await createTransport()
        const info = await mailer.sendMail({
             from: '"Fred Foo 👻" <foo@example.com>', // sender address
@@ -15,8 +15,8 @@ module.exports = async function emailer(sender , reciever ,subject, body, type) 
         })
 
         console.log("Message sent: %s", info);
-    } catch (error) {
-      console.log(error)
-    }
+    // } catch (error) {
+    //   console.log(error)
+    // }
 }
 
