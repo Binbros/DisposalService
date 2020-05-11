@@ -1,30 +1,33 @@
 "use strict"
-const amqp=  require ('amqplib/callback_api');
-const config = require("./config/config");
+const amqp=  require ('amqplib');
 const queues  = require('./utils/queues');
 
 const queues_array = [ 'verify_account', 'verify_device', 'unblock_device', 'forgot_password']
 
-module.exports = async function EmailConsumer() {
+const EmailConsumer = async function () {
     // while (true) {
         try {
-            const conn =  await amqp.connect(config.amqp);
-
+            let conn =  await amqp.connect('amqp://guest:guest@rabbitmq:5672?connection_attempts=5&retry_delay=5');
+            conn.on("error", function(err) {
+                if (err.message !== "Connection closing") {
+                  console.error("[AMQP] conn error", err.message);
+                }
+            })
             conn.on("close", function() {
                 console.error("[AMQP] reconnecting");
                 return setTimeout(EmailConsumer, 1000);
             })
      
-            const channel = await conn.createChannel();
+            let channel = await conn.createChannel();
          
             await channel.assertExchange('email_service','direct',{durable: true})
-            channel.prefetch(1);
-            queues(channel, queues_array, 'email_service')
+            await queues(channel, queues_array, 'email_service')
     
         } catch (error) {
            console.log(error)
         }  
     // }
 }
+EmailConsumer()
 
 

@@ -1,7 +1,7 @@
 "use strict";
 
 const Mailgen = require("mailgen");
-const mailgen =new Mailgen({
+const mailgen = new Mailgen({
         theme: "cerberus",
         product: {
             // Appears in header & footer of e-mails

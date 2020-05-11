@@ -76,8 +76,11 @@ export const refresh = async (parent: any, args: any, { request }: Context) => {
         if (!currentRefreshToken) {
             throw new Error("No Refresh Token found");
         }
+        // not yet implemented check if this request token has been blacklisted in redis
+        // if it has not been then decoded it
         const decoded = auth.decode(currentRefreshToken, secret.refreshSecret);
         const devices = auth.decode(decoded.address, secret.userSecret);
+        // after decoding it blacklist it here, that way no one can use it again.
         if (devices.auth) {
             const deviceExist = auth.checkIpAddresses({ devices: devices.address, ipAddresses: ipAddress }, request);
             if (deviceExist.status) {

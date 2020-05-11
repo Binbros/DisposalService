@@ -11,7 +11,7 @@ module.exports = (info) => {
           button: {
             color: "#22BC66", // Optional action button color
             text: "Confirm your account",
-            link: `${secret.frontUrl}/confirm?s=${info.token}`,
+            link: `localhost:2020//confirm?s=${info.token}`,
           },
         },
         {

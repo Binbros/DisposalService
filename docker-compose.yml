@@ -8,8 +8,13 @@ services:
       - ./.docker/rabbitmq/data/:/var/lib/rabbitmq/
       - ./.docker/rabbitmq/logs/:/var/log/rabbitmq/
     ports:
-        - 5672:5672
-        - 15672:15672
+      - 5672:5672
+      - 15672:15672
+    expose:
+      - 5672
+      - 15672
+   
+
   redis:
     build:
       context: "./services/redis-image"
@@ -43,16 +48,8 @@ services:
     build: 
       context: "./services/email"
     depends_on:
-      - rabbitmq
-    tty: true
-    command: dockerize -wait tcp://rabbitmq:5672 -timeout 600s
-    environment: 
-      - AMQP=amqp://rabbitmq?connection_attempts=5&retry_delay=5
-      - PORT=5672
-      - HOST=rabbitmq
-      - FRONT_URL=http://binbro.com
-    # ports: 
-    #   - "2020:2020"
+      - "rabbitmq"
+    command: sh -c 'dockerize -wait tcp://rabbitmq:5672 -timeout 300s -wait-retry-interval 30s && node src/subscribeEmails'
     volumes: 
       - ./services/email:/email
 
