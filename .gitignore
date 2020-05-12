@@ -1,0 +1,3 @@
+logs
+.docker/
+node_modules

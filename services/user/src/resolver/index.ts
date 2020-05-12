@@ -1,7 +1,3 @@
-import * as Mutation from './mutation'
+import userResolver from "./user"
 
-const resolvers = {
-  Mutation,
-}
-
-export default resolvers;
+export default userResolver ;
