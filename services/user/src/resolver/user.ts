@@ -80,7 +80,7 @@ export const refresh = async (parent: any, args: any, { request }: Context) => {
         const isRefreshTokenBlacklisted = await promisify(caching.lrange("usedRefreshToken", 0, 9999999999))
         .bind(caching);
         if (isRefreshTokenBlacklisted.indexOf(currentRefreshToken) > -1) {
-            throw new Error("Invalid refresh token");
+            throw new Error("Invalid refresh cookie");
         }
         // not yet implemented check if this request token has been blacklisted in redis
         // if it has not been then decoded it
