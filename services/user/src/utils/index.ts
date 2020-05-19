@@ -1,10 +1,11 @@
 import { NextFunction, Request, Response, Router } from "express";
 import { GraphQLServer } from "graphql-yoga";
 import * as auth from "./auth";
+import caching from "./caching";
 import logger from "./logger";
 import secret from "./secret";
-import verifyEmail from "./verifyEmail";
 import verifyDevice from "./verifyDevice";
+import verifyEmail from "./verifyEmail";
 
 type Wrapper =  ((router: GraphQLServer) => void);
 type Handler = (
@@ -28,4 +29,5 @@ export default({
     secret,
     verifyDevice,
     verifyEmail,
+    caching,
   });

@@ -1,10 +1,11 @@
 
 import { Context } from "graphql-yoga/dist/types";
+import { promisify } from 'util'
 import { object } from "yup";
 import helpers from "../utils";
 import yup from "../validations/user.schema";
 
-const { auth, secret, logger, verifyEmail, verifyDevice } = helpers;
+const { auth, secret, logger, verifyEmail, verifyDevice, caching } = helpers;
 export const getAllUsers = async (parent: any, args: any, { models }: Context) => {
     try {
         const users = await models.user.find({});
@@ -35,7 +36,7 @@ export const signup = async (parent: any, args: any, { models, response }: Conte
             id: user.id,
         }, response);
         const token = auth.generateAccessToken({ id: user.id });
-        verifyEmail({firstname: user.firstName, email: user.email, type: "verify_account" }, models);
+        verifyEmail({ firstname: user.firstName, email: user.email, type: "verify_account" }, models);
         return { user, token };
     } catch (err) {
         logger.error(err.toString());
@@ -76,10 +77,18 @@ export const refresh = async (parent: any, args: any, { request }: Context) => {
         if (!currentRefreshToken) {
             throw new Error("No Refresh Token found");
         }
+        const isRefreshTokenBlacklisted = await promisify(caching.lrange("usedRefreshToken", 0, 9999999999))
+        .bind(caching);
+        if (isRefreshTokenBlacklisted.indexOf(currentRefreshToken) > -1) {
+            throw new Error("Invalid refresh token");
+        }
         // not yet implemented check if this request token has been blacklisted in redis
         // if it has not been then decoded it
         const decoded = auth.decode(currentRefreshToken, secret.refreshSecret);
+        // tslint:disable-next-line: quotemark
+        await caching.lpush('usedRefreshToken', decoded);
         const devices = auth.decode(decoded.address, secret.userSecret);
+
         // after decoding it blacklist it here, that way no one can use it again.
         if (devices.auth) {
             const deviceExist = auth.checkIpAddresses({ devices: devices.address, ipAddresses: ipAddress }, request);
@@ -95,7 +104,7 @@ export const refresh = async (parent: any, args: any, { request }: Context) => {
     }
 };
 
-export const addDevice = async (parent: any, args: any, { models, request}: Context) => {
+export const addDevice = async (parent: any, args: any, { models, request }: Context) => {
     try {
         let retrievedIp;
         const tokenFromRefreshCookie = request.headers.cookies.split(";")[0];
@@ -105,7 +114,7 @@ export const addDevice = async (parent: any, args: any, { models, request}: Cont
         // when token is sent from email, we have to decode the token to get the id of the user
         if (savedIp.address.length === 0) {
             retrievedIp = (request.headers["x-forwarded-For"] ||
-            request.connection.remoteAddress).split(",")[0].trim();
+                request.connection.remoteAddress).split(",")[0].trim();
         }
         const decoded = auth.verifyToken(request) || auth.decode(args.token, secret.emailTokenSecret);
         // get the user details
@@ -114,13 +123,15 @@ export const addDevice = async (parent: any, args: any, { models, request}: Cont
                 deviceName: args.deviceName,
                 ipAddress: args.ipAddress || decoded.ipAddress || retrievedIp,
             };
-            const user = await models.user.findById( decoded.id || args.id);
+            const user = await models.user.findById(decoded.id || args.id);
             const allIps = user.devices && user.devices.map((device: any) => device.ipAddress);
             if (!allIps.includes(newDevice.ipAddress)) {
                 await models.user.updateOne({ _id: user.id }, {
-                    $set: { devices: [...user.devices, newDevice],
-                           useSecondAuth: true,
-                    }});
+                    $set: {
+                        devices: [...user.devices, newDevice],
+                        useSecondAuth: true,
+                    },
+                });
             }
             return user;
         }
@@ -243,3 +254,4 @@ const resolver = {
 };
 
 export default resolver;
+

@@ -28,7 +28,7 @@
     "mailgen": "^2.0.10",
     "mongoose": "^5.9.7",
     "morgan": "^1.10.0",
-    "redis": "^3.0.2",
+    "node-redis": "^0.1.7",
     "uuid": "^7.0.3",
     "winston-loggly-bulk": "^3.1.0",
     "yup": "^0.28.4"

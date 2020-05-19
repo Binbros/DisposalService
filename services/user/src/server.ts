@@ -43,3 +43,4 @@ const options = {
 server.start(options, ({port}) =>
 logger.warn(`Server started, listening on port ${port} for incoming requests.`),
 );
+

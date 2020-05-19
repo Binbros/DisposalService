@@ -9,7 +9,7 @@ import morgan from "morgan";
 import logger from "../utils/logger";
 
 export const handleCors = (router: GraphQLServer) =>
-  router.use(cors({ credentials: true, origin: true }));
+  router.use(cors({ credentials: true, origin: ['http:8500/'] }));
 
 export const handleBodyRequestParsing = (router: GraphQLServer) => {
   router.use(parser.urlencoded({ extended: true }));
