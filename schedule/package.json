@@ -28,7 +28,7 @@
     "@types/node": "^13.9.4",
     "@types/redis": "^2.8.16",
     "@types/winston-loggly-bulk": "^3.0.0",
-    "apollo-server-express": "^2.11.0",
+    "apollo-server-express": "^2.14.2",
     "body-parser": "^1.19.0",
     "compression": "^1.7.4",
     "concurrently": "^5.1.0",
